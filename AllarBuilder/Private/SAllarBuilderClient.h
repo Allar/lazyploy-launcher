@@ -26,7 +26,7 @@ public:
 	* @param InArgs Slate arguments, not used
 	* @param Client Allar Builder client implementation object
 	*/
-	void Construct(const FArguments& InArgs, TSharedRef<FAllarBuilderClient> Client);
+	void Construct(const FArguments& InArgs, TSharedRef<FAllarBuilderClient> Client, const TSharedRef<ISlateStyle>& InStyle);
 
 private:
 

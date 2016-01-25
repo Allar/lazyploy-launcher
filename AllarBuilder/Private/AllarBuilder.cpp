@@ -21,7 +21,7 @@ IMPLEMENT_APPLICATION(AllarBuilder, "AllarBuilder");
 const float IdealTickRate = 30.f;
 
 /** Default main window size */
-const FVector2D InitialWindowDimensions(740, 560);
+const FVector2D InitialWindowDimensions(700, 560);
 
 void RunAllarBuilderClient(const TCHAR* CommandLine)
 {
@@ -41,13 +41,15 @@ void RunAllarBuilderClient(const TCHAR* CommandLine)
 	// Create the main implementation object
 	TSharedRef<FAllarBuilderClient> AllarBuilderClient = MakeShareable(new FAllarBuilderClient());
 
+	TSharedRef<FSlateStyleSet> Style = FAllarBuilderClientStyle::GetPtr().ToSharedRef();
+
 	// open up the app window	
-	TSharedRef<SAllarBuilderClient> ClientControl = SNew(SAllarBuilderClient, AllarBuilderClient);
+	TSharedRef<SAllarBuilderClient> ClientControl = SNew(SAllarBuilderClient, AllarBuilderClient, Style);
 
 	auto Window = FSlateApplication::Get().AddWindow(
 		SNew(SWindow)
 		.Title(NSLOCTEXT("AllarBuilder", "AllarBuilderClientAppName", "Allar's Unreal Engine 4 Development Launcher"))
-		
+		.SizingRule(ESizingRule::FixedSize)		
 		.ClientSize(InitialWindowDimensions)
 		[
 			ClientControl
@@ -59,7 +61,7 @@ void RunAllarBuilderClient(const TCHAR* CommandLine)
 	{
 		FSlateApplication::Get().AddWindow(
 			SNew(SWindow)
-			.ClientSize(FVector2D(800, 600))
+			.ClientSize(FVector2D(720, 600))
 			.ScreenPosition(FVector2D(0, 1080))
 			.AutoCenter(EAutoCenter::None)
 			[

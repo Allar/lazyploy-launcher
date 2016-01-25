@@ -23,6 +23,7 @@ public:
 	* Access to singleton style object
 	*/
 	static const ISlateStyle& Get();
+	static const TSharedPtr<FSlateStyleSet> GetPtr();
 
 private:
 	static TSharedRef< FSlateStyleSet > Create();

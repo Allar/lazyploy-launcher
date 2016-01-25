@@ -45,17 +45,29 @@ TSharedRef< FSlateStyleSet > FAllarBuilderClientStyle::Create()
 	FSlateStyleSet& Style = StyleRef.Get();
 
 	const FTextBlockStyle DefaultText = FTextBlockStyle()
-		.SetFont(TTF_FONT("Fonts/Roboto-Bold", 10))
+		.SetFont(TTF_FONT("Fonts/Roboto-Regular", 10))
 		.SetColorAndOpacity(FSlateColor::UseForeground())
 		.SetShadowOffset(FVector2D::ZeroVector)
 		.SetShadowColorAndOpacity(FLinearColor::Black);
 
 	// Set the client app styles
+	Style.Set(TEXT("Background"), new IMAGE_BRUSH("Common/NoiseBackground", Icon64x64, FLinearColor(1,1,1,1), ESlateBrushTileType::Both));
+
 	Style.Set(TEXT("ProjectPicker.Text"), FTextBlockStyle(DefaultText)
-		.SetFontSize(24)
+		.SetFont(TTF_FONT("Fonts/Roboto-Regular", 24))
 		);
 	
 	Style.Set(TEXT("ProjectPicker.ErrorImage"), new IMAGE_BRUSH("Icons/icon_error_16x", Icon48x48));
+
+	Style.Set(TEXT("Section.Label"), FTextBlockStyle(DefaultText)
+		.SetFont(TTF_FONT("Fonts/Roboto-Bold", 18))
+		);
+
+	Style.Set(TEXT("Section.Border"), new BOX_BRUSH("Common/GroupBorder", FMargin(4.0f / 16.0f)));
+
+	Style.Set(TEXT("Section.Text"), FTextBlockStyle(DefaultText)
+		.SetFont(TTF_FONT("Fonts/Roboto-Regular", 10))
+		);
 
 
 	Style.Set(TEXT("Code"), FTextBlockStyle(DefaultText)
@@ -123,4 +135,9 @@ TSharedRef< FSlateStyleSet > FAllarBuilderClientStyle::Create()
 const ISlateStyle& FAllarBuilderClientStyle::Get()
 {
 	return *StyleSet;
+}
+
+const TSharedPtr<FSlateStyleSet> FAllarBuilderClientStyle::GetPtr()
+{
+	return StyleSet;
 }
