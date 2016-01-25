@@ -38,6 +38,7 @@ namespace
 TSharedRef< FSlateStyleSet > FAllarBuilderClientStyle::Create()
 {
 	const FVector2D Icon16x16(16.0f, 16.0f);
+	const FVector2D Icon32x32(32.0f, 32.0f);
 	const FVector2D Icon48x48(48.0f, 48.0f);
 	const FVector2D Icon64x64(64.0f, 64.0f);
 
@@ -57,7 +58,7 @@ TSharedRef< FSlateStyleSet > FAllarBuilderClientStyle::Create()
 		.SetFont(TTF_FONT("Fonts/Roboto-Regular", 24))
 		);
 	
-	Style.Set(TEXT("ProjectPicker.ErrorImage"), new IMAGE_BRUSH("Icons/icon_error_16x", Icon48x48));
+	Style.Set(TEXT("ProjectPicker.ErrorImage"), new IMAGE_BRUSH("Icons/icon_error_16x", Icon32x32));
 
 	Style.Set(TEXT("Section.Label"), FTextBlockStyle(DefaultText)
 		.SetFont(TTF_FONT("Fonts/Roboto-Bold", 18))

@@ -42,21 +42,7 @@ public:
 	bool IsProjectSelected() const;
 	FReply LaunchEditor();
 
-	// Client options
-	void OnNumberOfClientsChanged(uint32 Value, ETextCommit::Type CommitType);
-	void OnListenServerChanged(const ECheckBoxState NewCheckedState);
-	void OnAutoConnectChanged(const ECheckBoxState NewCheckedState);
-	void OnClientArgumentsChanged(const FText& InText, ETextCommit::Type InCommitType);
-	void OnResXChanged(uint32 Value, ETextCommit::Type CommitType);
-	void OnResYChanged(uint32 Value, ETextCommit::Type CommitType);
-	void OnPosXChanged(uint32 Value, ETextCommit::Type CommitType);
-	void OnPosYChanged(uint32 Value, ETextCommit::Type CommitType);
-
-	bool IsAutoConnectEnabled() const;
-
-	FReply LaunchClients();
-
-private:
+public:
 
 	// Project settings
 	FString ProjectPath;

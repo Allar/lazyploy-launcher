@@ -28,9 +28,9 @@ void SProjectPicker::Construct(const FArguments& InArgs, const FAllarBuilderClie
 	Model = InModel;
 
 	ChildSlot
-		[
-			MakeProjectWidget()
-		];
+	[
+		MakeProjectWidget()
+	];
 }
 
 
