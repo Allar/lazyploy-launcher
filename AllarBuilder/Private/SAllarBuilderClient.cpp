@@ -155,6 +155,7 @@ void SAllarBuilderClient::Construct(const FArguments& InArgs, TSharedRef<FAllarB
 										SNew(SCheckBox)
 										.IsChecked(ECheckBoxState::Unchecked)
 										.IsEnabled(Client, &FAllarBuilderClient::IsAutoConnectEnabled)
+										.OnCheckStateChanged(Client, &FAllarBuilderClient::OnAutoConnectChanged)
 									]
 									// Resolution X
 									+ SHorizontalBox::Slot()
