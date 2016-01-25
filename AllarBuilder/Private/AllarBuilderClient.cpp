@@ -35,3 +35,23 @@ FString FAllarBuilderClient::GetProjectName() const
 	}
 	return FString();
 }
+
+bool FAllarBuilderClient::IsEditorEnabled() const
+{
+	return !ProjectPath.IsEmpty();
+}
+
+FReply FAllarBuilderClient::LaunchEditor()
+{
+#if PLATFORM_WINDOWS
+	#if PLATFORM_64BITS
+	const FString EditorPath = FPaths::EngineDir() / TEXT("Binaries/Win64/UE4Editor.exe");
+	#else
+	const FString EditorPath = FPaths::EngineDir() / TEXT("Binaries/Win32/UE4Editor.exe");
+	#endif
+#endif
+
+	uint32 ProcessID;
+	FPlatformProcess::CreateProc(*EditorPath, *GetProjectPath(), true, false, false, &ProcessID, 0, nullptr, nullptr);
+	return FReply::Handled();
+}

@@ -37,6 +37,10 @@ namespace
 
 TSharedRef< FSlateStyleSet > FAllarBuilderClientStyle::Create()
 {
+	const FVector2D Icon16x16(16.0f, 16.0f);
+	const FVector2D Icon48x48(48.0f, 48.0f);
+	const FVector2D Icon64x64(64.0f, 64.0f);
+
 	TSharedRef<FSlateStyleSet> StyleRef = MakeShareable(new FSlateStyleSet("FAllarBuilderClientStyle"));
 	FSlateStyleSet& Style = StyleRef.Get();
 
@@ -47,6 +51,13 @@ TSharedRef< FSlateStyleSet > FAllarBuilderClientStyle::Create()
 		.SetShadowColorAndOpacity(FLinearColor::Black);
 
 	// Set the client app styles
+	Style.Set(TEXT("ProjectPicker.Text"), FTextBlockStyle(DefaultText)
+		.SetFontSize(24)
+		);
+	
+	Style.Set(TEXT("ProjectPicker.ErrorImage"), new IMAGE_BRUSH("Icons/icon_error_16x", Icon48x48));
+
+
 	Style.Set(TEXT("Code"), FTextBlockStyle(DefaultText)
 		.SetFont(TTF_FONT("Fonts/Roboto-Regular", 8))
 		.SetColorAndOpacity(FSlateColor(FLinearColor::White * 0.8f))
@@ -60,7 +71,6 @@ TSharedRef< FSlateStyleSet > FAllarBuilderClientStyle::Create()
 		.SetColorAndOpacity(FSlateColor::UseSubduedForeground())
 		);
 
-	const FVector2D Icon16x16(16.0f, 16.0f);
 	FSlateBrush* GenericWhiteBox = new IMAGE_BRUSH("Old/White", Icon16x16);
 
 	// Scrollbar

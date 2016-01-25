@@ -46,12 +46,26 @@ void RunAllarBuilderClient(const TCHAR* CommandLine)
 
 	auto Window = FSlateApplication::Get().AddWindow(
 		SNew(SWindow)
-		.Title(NSLOCTEXT("AllarBuilder", "AllarBuilderClientAppName", "Allar Builder"))
+		.Title(NSLOCTEXT("AllarBuilder", "AllarBuilderClientAppName", "Allar's Unreal Engine 4 Development Launcher"))
+		
 		.ClientSize(InitialWindowDimensions)
 		[
 			ClientControl
 		]
 	);
+
+	// Debugging code
+	if (true)
+	{
+		FSlateApplication::Get().AddWindow(
+			SNew(SWindow)
+			.ClientSize(FVector2D(800, 600))
+			.ScreenPosition(FVector2D(0, 1080))
+			.AutoCenter(EAutoCenter::None)
+			[
+				FModuleManager::LoadModuleChecked<ISlateReflectorModule>("SlateReflector").GetWidgetReflector()
+			]);
+	}
 
 	// Setting focus seems to have to happen after the Window has been added
 	FSlateApplication::Get().ClearKeyboardFocus(EFocusCause::Cleared);

@@ -40,21 +40,22 @@ public:
 			[
 				SNew(SHorizontalBox)
 					+ SHorizontalBox::Slot()
-						.FillWidth(1.0f)
-						.VAlign(VAlign_Center)
-						[
-							SNew(STextBlock)
-							.Text(InArgs._LabelText)
-						]
-
-					+ SHorizontalBox::Slot()
 						.AutoWidth()
 						.VAlign(VAlign_Center)
 						[
 							SNew(SImage)
-								.Image(FCoreStyle::Get().GetBrush(TEXT("Icons.Error")))
+								.Image(FAllarBuilderClientStyle::Get().GetBrush(TEXT("ProjectPicker.ErrorImage")))
 								.ToolTipText(InArgs._ErrorToolTipText)
 								.Visibility(InArgs._ErrorVisibility)
+						]
+
+					+ SHorizontalBox::Slot()
+						.FillWidth(1.0f)
+						.VAlign(VAlign_Center)
+						[
+							SNew(STextBlock)
+								.Text(InArgs._LabelText)
+								.TextStyle(FAllarBuilderClientStyle::Get(), TEXT("ProjectPicker.Text"))
 						]
 			];
 	}

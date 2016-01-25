@@ -67,11 +67,12 @@ TSharedRef<SWidget> SProjectPicker::MakeProjectWidget()
 			SNew(SHorizontalBox)
 				+ SHorizontalBox::Slot()
 					.AutoWidth()
+					.Padding(0.0f, 0.0f, 16.0f, 0.0f)
 					[
 						SNew(SAllarBuilderFormLabel)
 							.ErrorToolTipText(NSLOCTEXT("AllarBuilderBuildValidation", "NoProjectSelectedError", "A Project must be selected."))
 							.ErrorVisibility(this, &SProjectPicker::HandleValidationErrorIconVisibility)
-							.LabelText(LOCTEXT("ProjectComboBoxLabel", "Project"))
+							.LabelText(LOCTEXT("ProjectComboBoxLabel", "Project:"))
 					]
 
 				+ SHorizontalBox::Slot()
@@ -83,6 +84,7 @@ TSharedRef<SWidget> SProjectPicker::MakeProjectWidget()
 							[
 								SNew(STextBlock)
 									.Text(this, &SProjectPicker::HandleProjectComboButtonText)
+									.TextStyle(FAllarBuilderClientStyle::Get(), TEXT("ProjectPicker.Text"))
 							]
 							.ContentPadding(FMargin(4.0f, 2.0f))
 							.MenuContent()
@@ -152,7 +154,7 @@ EVisibility SProjectPicker::HandleValidationErrorIconVisibility() const
 	{
 		return EVisibility::Visible;
 	}
-	return EVisibility::Hidden;
+	return EVisibility::Collapsed;
 }
 
 

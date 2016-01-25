@@ -37,6 +37,9 @@ public:
 
 	FString GetProjectName() const;
 
+	bool IsEditorEnabled() const;
+	FReply LaunchEditor();
+
 private:
 
 	FString ProjectPath;

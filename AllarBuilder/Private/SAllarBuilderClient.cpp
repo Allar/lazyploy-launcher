@@ -21,9 +21,31 @@ void SAllarBuilderClient::Construct(const FArguments& InArgs, TSharedRef<FAllarB
 				SNew(SVerticalBox)
 					+ SVerticalBox::Slot()
 						.AutoHeight()
+						.Padding(8.0f)
 						[
-							SNew(SProjectPicker, Client)
+							SNew(SHorizontalBox)
+								+ SHorizontalBox::Slot()
+									.FillWidth(1.0f)
+									[
+										SNew(SProjectPicker, Client)
+									]
+								+ SHorizontalBox::Slot()
+									.AutoWidth()
+									.HAlign(HAlign_Right)
+									[
+										SNew(SButton)
+											.VAlign(VAlign_Center)
+											.IsEnabled(AllarBuilderClient.Get(), &FAllarBuilderClient::IsEditorEnabled)
+											.OnClicked(AllarBuilderClient.Get(), &FAllarBuilderClient::LaunchEditor)
+											.Content()
+											[
+												SNew(STextBlock)
+													.Text(LOCTEXT("LaunchEditor", "Editor"))
+													.TextStyle(FAllarBuilderClientStyle::Get(), TEXT("ProjectPicker.Text"))
+											]
+									]
 						]
+						
 			]
 		];
 }
