@@ -2,6 +2,7 @@
 #include "SCookProgress.h"
 #include "../STaskListRow.h"
 #include "../GenericTask.h"
+#include "SGenericTaskMessageListRow.h"
 
 #define LOCTEXT_NAMESPACE "CookProgress"
 
@@ -11,39 +12,40 @@ void SCookProgress::Construct(const FArguments& InArgs, TSharedRef<FAllarBuilder
 
 	ChildSlot
 	[
-		SNew(SBox)
-		.MinDesiredHeight(350)
+		SNew(SVerticalBox)
+		//+ SVerticalBox::Slot()
+		//.AutoHeight()
+		//[
+		//	SNew(SBorder)
+		//	.BorderImage(FCoreStyle::Get().GetBrush("ToolPanel.GroupBorder"))
+		//	.Padding(8.0f)
+		//	[
+		//		SNew(SVerticalBox)
+		//		+ SVerticalBox::Slot()
+		//		.AutoHeight()
+		//		[
+		//			SNew(STextBlock)
+		//			.Text(this, &SCookProgress::HandleProgressTextBlockText)
+		//		]
+
+		//		+ SVerticalBox::Slot()
+		//		.AutoHeight()
+		//		.Padding(0.0f, 4.0f, 0.0f, 0.0f)
+		//		[
+		//			SAssignNew(ProgressBar, SProgressBar)
+		//			.Percent(this, &SCookProgress::HandleProgressBarPercent)
+		//		]
+		//	]
+		//]
+
+		+ SVerticalBox::Slot()
+		.AutoHeight()
+		.Padding(0.0f, 8.0f, 0.0f, 0.0f)
 		[
-			SNew(SVerticalBox)
-			+ SVerticalBox::Slot()
-			.AutoHeight()
+			SNew(SBox)
+			.HeightOverride(150)
 			[
-				SNew(SBorder)
-				.BorderImage(FCoreStyle::Get().GetBrush("ToolPanel.GroupBorder"))
-				.Padding(8.0f)
-				[
-					SNew(SVerticalBox)
-					+ SVerticalBox::Slot()
-					.AutoHeight()
-					[
-						SNew(STextBlock)
-						.Text(this, &SCookProgress::HandleProgressTextBlockText)
-					]
-
-					+ SVerticalBox::Slot()
-					.AutoHeight()
-					.Padding(0.0f, 4.0f, 0.0f, 0.0f)
-					[
-						SAssignNew(ProgressBar, SProgressBar)
-						.Percent(this, &SCookProgress::HandleProgressBarPercent)
-					]
-				]
-			]
-
-			+ SVerticalBox::Slot()
-			.FillHeight(1.0)
-			.Padding(0.0f, 8.0f, 0.0f, 0.0f)
-			[
+			
 				SNew(SBorder)
 				.BorderImage(FCoreStyle::Get().GetBrush("ToolPanel.GroupBorder"))
 				.Padding(0.0f)
@@ -75,106 +77,68 @@ void SCookProgress::Construct(const FArguments& InArgs, TSharedRef<FAllarBuilder
 					.SelectionMode(ESelectionMode::Single)
 				]
 			]
+		]
 
-			//content area for the log
-			/*+ SVerticalBox::Slot()
-			.FillHeight(0.5)
-			.Padding(0.0, 32.0, 8.0, 0.0)
+		//content area for the log
+		+ SVerticalBox::Slot()
+		.AutoHeight()
+		.Padding(0.0f, 8.0f, 0.0f, 0.0f)
+		[
+			SNew(SBox)
+			.HeightOverride(150)
 			[
 				SNew(SBorder)
-				.BorderImage(FCoreStyle.Get().GetBrush("ToolPanel.GroupBorder"))
+				.BorderImage(FCoreStyle::Get().GetBrush("ToolPanel.GroupBorder"))
 				.Padding(0.0f)
 				[
-					SAssignNew(MessageListView, SListView< TSharedPtr<FProjectLauncherMessage> >)
+					SAssignNew(MessageListView, SListView< TSharedPtr<FGenericTaskMessage> >)
 					.HeaderRow
 					(
 						SNew(SHeaderRow)
 						+ SHeaderRow::Column("Status")
-						.DefaultLabel(LOCTEXT("TaskListStatusColumnHeader", "Status"))
+						.DefaultLabel(LOCTEXT("TaskListStatusColumnHeader", "Output Log"))
 						.FillWidth(1.0)
 					)
 					.ListItemsSource(&MessageList)
-					.OnGenerateRow(this, &SProjectLauncherProgress::HandleMessageListViewGenerateRow)
+					.OnGenerateRow(this, &SCookProgress::HandleMessageListViewGenerateRow)
 					.ItemHeight(24.0)
 					.SelectionMode(ESelectionMode::Multi)
 				]
-			]*/
+			]
+		]
 
-			+ SVerticalBox::Slot()
-			.AutoHeight()
-			.Padding(0.0f, 5.0f, 0.0f, 0.0f)
+		+ SVerticalBox::Slot()
+		.AutoHeight()
+		.Padding(0.0f, 5.0f, 0.0f, 0.0f)
+		[
+			SNew(SHorizontalBox)
+
+			+ SHorizontalBox::Slot()
+			.AutoWidth()
+			.Padding(4.0f, 0.0f, 0.0f, 0.0f)
 			[
-				SNew(SHorizontalBox)
+				// clear button
+				SAssignNew(ClearButton, SButton)
+				.ContentPadding(FMargin(6.0f, 2.0f))
+				.Text(LOCTEXT("ClearButtonText", "Clear Log"))
+				.ToolTipText(LOCTEXT("ClearButtonTooltip", "Clear the log window"))
+				.IsEnabled(this, &SCookProgress::IsClearLogEnabled)
+				.OnClicked(this, &SCookProgress::HandleClearLogButtonClicked)
+			]
 
-				+ SHorizontalBox::Slot()
-				.AutoWidth()
+			+ SHorizontalBox::Slot()
+			.AutoWidth()
+			.Padding(4.0f, 0.0f, 0.0f, 0.0f)
+			[
+				// Cancel button
+				SNew(SButton)
+				.ContentPadding(FMargin(6.0f, 2.0f))
+				.IsEnabled(this, &SCookProgress::IsCancelButtonEnabled)
+				.OnClicked(this, &SCookProgress::HandleCancelButtonClicked)
+				//.ToolTipText(this, &SProjectLauncherProgress::GetDoneButtonToolTip)
 				[
-					// copy button
-					SAssignNew(CopyButton, SButton)
-					.ContentPadding(FMargin(6.0f, 2.0f))
-					.IsEnabled(false)
-					.Text(LOCTEXT("CopyButtonText", "Copy"))
-					.ToolTipText(LOCTEXT("CopyButtonTooltip", "Copy the selected log messages to the clipboard"))
-					//.OnClicked(this, &SProjectLauncherProgress::HandleCopyButtonClicked)
-				]
-
-				+ SHorizontalBox::Slot()
-				.AutoWidth()
-				.Padding(4.0f, 0.0f, 0.0f, 0.0f)
-				[
-					// clear button
-					SAssignNew(ClearButton, SButton)
-					.ContentPadding(FMargin(6.0f, 2.0f))
-					.IsEnabled(false)
-					.Text(LOCTEXT("ClearButtonText", "Clear Log"))
-					.ToolTipText(LOCTEXT("ClearButtonTooltip", "Clear the log window"))
-					//.OnClicked(this, &SProjectLauncherProgress::HandleClearButtonClicked)
-				]
-
-				+ SHorizontalBox::Slot()
-				.AutoWidth()
-				.Padding(4.0f, 0.0f, 0.0f, 0.0f)
-				[
-					// save button
-					SAssignNew(SaveButton, SButton)
-					.ContentPadding(FMargin(6.0f, 2.0f))
-					.IsEnabled(false)
-					.Text(LOCTEXT("ExportButtonText", "Save Log..."))
-					.ToolTipText(LOCTEXT("SaveButtonTooltip", "Save the entire log to a file"))
-					//.Visibility((FDesktopPlatformModule::Get() != NULL) ? EVisibility::Visible : EVisibility::Collapsed)
-					//.OnClicked(this, &SProjectLauncherProgress::HandleSaveButtonClicked)
-				]
-
-				+ SHorizontalBox::Slot()
-				.AutoWidth()
-				.Padding(4.0f, 0.0f, 0.0f, 0.0f)
-				[
-					// Re-Run button
-					SNew(SButton)
-					.ContentPadding(FMargin(6.0f, 2.0f))
-					//.IsEnabled(this, &SProjectLauncherProgress::IsRerunButtonEnabled)
-					//.OnClicked(this, &SProjectLauncherProgress::HandleRerunButtonClicked)
-					//.ToolTipText(this, &SProjectLauncherProgress::GetRerunButtonToolTip)
-					[
-						SNew(STextBlock)
-						//.Text(this, &SProjectLauncherProgress::GetRerunButtonText)
-					]
-				]
-
-				+ SHorizontalBox::Slot()
-				.AutoWidth()
-				.Padding(4.0f, 0.0f, 0.0f, 0.0f)
-				[
-					// Cancel button
-					SNew(SButton)
-					.ContentPadding(FMargin(6.0f, 2.0f))
-					.IsEnabled(this, &SCookProgress::IsCancelButtonEnabled)
-					.OnClicked(this, &SCookProgress::HandleCancelButtonClicked)
-					//.ToolTipText(this, &SProjectLauncherProgress::GetDoneButtonToolTip)
-					[
-						SNew(STextBlock)
-						.Text(LOCTEXT("CancelButtonText", "Cancel"))
-					]
+					SNew(STextBlock)
+					.Text(LOCTEXT("CancelButtonText", "Cancel"))
 				]
 			]
 		]
@@ -201,6 +165,28 @@ TSharedRef<ITableRow> SCookProgress::HandleTaskListViewGenerateRow(FGenericTaskP
 	return SNew(STaskListRow)
 		.Task(InItem)
 		.OwnerTableView(OwnerTable);
+}
+
+TSharedRef<ITableRow> SCookProgress::HandleMessageListViewGenerateRow(TSharedPtr<FGenericTaskMessage> InItem, const TSharedRef<STableViewBase>& OwnerTable) const
+{
+	return SNew(SGenericTaskMessageListRow, OwnerTable)
+		.Message(InItem)
+		.ToolTipText(InItem->Message);
+}
+
+void SCookProgress::Tick(const FGeometry& AllottedGeometry, const double InCurrentTime, const float InDeltaTime)
+{
+	if (PendingMessages.Num() > 0)
+	{
+		FScopeLock ScopedLock(&CriticalSection);
+		for (int32 Index = 0; Index < PendingMessages.Num(); ++Index)
+		{
+			MessageList.Add(PendingMessages[Index]);
+		}
+		PendingMessages.Reset();
+		MessageListView->RequestListRefresh();
+		MessageListView->RequestScrollIntoView(MessageList.Last());
+	}
 }
 
 bool SCookProgress::IsReadyForNewJob() const
@@ -256,6 +242,27 @@ FReply SCookProgress::HandleCancelButtonClicked()
 	return FReply::Handled();
 }
 
+void SCookProgress::HandleTaskMessageReceived(const FString& InMessage)
+{
+	FScopeLock ScopedLock(&CriticalSection);
+	ELogVerbosity::Type Verbosity = ELogVerbosity::Log;
+
+	if (InMessage.Contains(TEXT("Automation.ParseCommandLine:"), ESearchCase::CaseSensitive))
+	{
+		Verbosity = ELogVerbosity::Display;
+	}
+	else if (InMessage.Contains(TEXT("Error:"), ESearchCase::IgnoreCase))
+	{
+		Verbosity = ELogVerbosity::Error;
+	}
+	else if (InMessage.Contains(TEXT("Warning:"), ESearchCase::IgnoreCase))
+	{
+		Verbosity = ELogVerbosity::Warning;
+	}
+	TSharedPtr<FGenericTaskMessage> Message = MakeShareable(new FGenericTaskMessage(FText::FromString(InMessage), Verbosity));
+	PendingMessages.Add(Message);
+}
+
 void SCookProgress::HandleTaskCompleted(const FString& CompletedTaskName)
 {
 	int32 CompletedTaskIndex = -1;
@@ -295,6 +302,7 @@ void SCookProgress::ClearTasks()
 void SCookProgress::AddTask(FGenericTaskPtr NewTask)
 {
 	NewTask->OnCompleted().AddRaw(this, &SCookProgress::HandleTaskCompleted);
+	NewTask->OnMessageRecieved().AddRaw(this, &SCookProgress::HandleTaskMessageReceived);
 	TaskList.Add(NewTask);
 	TaskListView->RequestListRefresh();
 }
@@ -303,6 +311,7 @@ void SCookProgress::NewTask(const FString& InProcessPath, const FString& InProce
 {
 	FGenericTaskPtr NewTask = MakeShareable(new FGenericTask(InProcessPath, InProcessArguments, InWorkingDirectory, InName, InDesc, bInHidden));
 	NewTask->OnCompleted().AddRaw(this, &SCookProgress::HandleTaskCompleted);
+	NewTask->OnMessageRecieved().AddRaw(this, &SCookProgress::HandleTaskMessageReceived);
 	TaskList.Add(NewTask);
 	TaskListView->RequestListRefresh();
 }
@@ -314,6 +323,8 @@ void SCookProgress::ExecuteTasks()
 	{
 		return;
 	}
+
+	ClearLog();
 
 	for (int32 i = 0; i < TaskList.Num(); ++i)
 	{
@@ -332,4 +343,21 @@ void SCookProgress::CancelTasks()
 	{
 		TaskList[i]->Cancel();
 	}
+}
+
+bool SCookProgress::IsClearLogEnabled() const
+{
+	return MessageList.Num() > 0;
+}
+
+FReply SCookProgress::HandleClearLogButtonClicked()
+{
+	ClearLog();
+	return FReply::Handled();
+}
+
+void SCookProgress::ClearLog()
+{
+	MessageList.Reset();
+	MessageListView->RequestListRefresh();
 }

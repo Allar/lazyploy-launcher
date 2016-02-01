@@ -2,6 +2,7 @@
 
 #pragma once
 #include "../GenericTask.h"
+#include "SGenericTaskMessageListRow.h"
 
 /**
 * Implements a widget for form input field labels with optional validation errors.
@@ -30,6 +31,11 @@ public:
 	// Callback for generating a row in the task list view.
 	TSharedRef<ITableRow> HandleTaskListViewGenerateRow(FGenericTaskPtr InItem, const TSharedRef<STableViewBase>& OwnerTable) const;
 
+	// Callback for generating a row in the message/log output window.
+	TSharedRef<ITableRow> HandleMessageListViewGenerateRow(TSharedPtr<FGenericTaskMessage> InItem, const TSharedRef<STableViewBase>& OwnerTable) const;
+
+	void Tick(const FGeometry& AllottedGeometry, const double InCurrentTime, const float InDeltaTime) override;
+
 	bool IsReadyForNewJob() const;
 
 	bool IsBusy() const;
@@ -39,6 +45,7 @@ public:
 	bool IsCancelButtonEnabled() const;
 	FReply HandleCancelButtonClicked();
 
+	void HandleTaskMessageReceived(const FString& InMessage);
 	void HandleTaskCompleted(const FString& CompletedTaskName);
 	
 	void ClearTasks();
@@ -46,6 +53,10 @@ public:
 	void NewTask(const FString& InProcessPath, const FString& InProcessArguments, const FString& InWorkingDirectory, const FString& InName, const FString& InDesc, bool bInHidden = true);
 	void ExecuteTasks();
 	void CancelTasks();
+
+	bool IsClearLogEnabled() const;
+	FReply HandleClearLogButtonClicked();
+	void ClearLog();
 
 protected:
 
@@ -64,12 +75,18 @@ private:
 	// Holds the task list view.
 	TSharedPtr<SListView<FGenericTaskPtr>> TaskListView;
 
-	// Holds the copy log button.
-	TSharedPtr<SButton> CopyButton;
+	// Holds the message list.
+	TArray< TSharedPtr<FGenericTaskMessage>> MessageList;
+
+	// Holds the pending message list.
+	TArray< TSharedPtr<FGenericTaskMessage>> PendingMessages;
+
+	// Holds the message list view.
+	TSharedPtr<SListView<TSharedPtr<FGenericTaskMessage>>> MessageListView;
+
+	// Critical section for updating the messages
+	FCriticalSection CriticalSection;
 
 	// Holds the clear button.
 	TSharedPtr<SButton> ClearButton;
-
-	// Holds the save button.
-	TSharedPtr<SButton> SaveButton;
 };

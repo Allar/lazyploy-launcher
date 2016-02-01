@@ -261,7 +261,7 @@ FReply SCookAndDeploy::StartCook()
 	{
 		CookProgress->ClearTasks();
 		CookProgress->NewTask(TEXT("C:/Windows/System32/mspaint.exe"), TEXT(""), TEXT(""), TEXT("Test Paint Task"), TEXT("Testing to see how this works"), false);
-		CookProgress->NewTask(TEXT("C:/Windows/System32/mspaint.exe"), TEXT(""), TEXT(""), TEXT("Second Task"), TEXT("Second test task"), false);
+		CookProgress->NewTask(TEXT("git"), TEXT(""), TEXT(""), TEXT("Second Task"), TEXT("Second test task"), false);
 		CookProgress->ExecuteTasks();
 	}
 	

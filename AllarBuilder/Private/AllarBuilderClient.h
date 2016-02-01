@@ -47,17 +47,4 @@ public:
 	// Project settings
 	FString ProjectPath;
 
-	// Client settings
-	uint32 NumberOfClients;
-	bool bLaunchListenServer;
-	bool bAutoConnect;
-
-	uint32 ResX;
-	uint32 ResY;
-	uint32 PosX;
-	uint32 PosY;
-
-	FString ClientArguments;
-	
-
 };

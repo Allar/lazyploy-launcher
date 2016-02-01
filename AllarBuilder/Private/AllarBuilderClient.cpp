@@ -5,8 +5,6 @@
 #include "TaskGraphInterfaces.h"
 
 FAllarBuilderClient::FAllarBuilderClient()
-	: bLaunchListenServer(false), bAutoConnect(false)
-	, NumberOfClients(1), ResX(1280), ResY(720), PosX(0), PosY(0)
 {
 }
 
