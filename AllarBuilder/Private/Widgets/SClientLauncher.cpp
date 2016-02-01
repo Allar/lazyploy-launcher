@@ -12,7 +12,7 @@ void SClientLauncher::Construct(const FArguments& InArgs, TSharedRef<FAllarBuild
 		SNew(SHorizontalBox)
 		+ SHorizontalBox::Slot()
 		.FillWidth(1.0f)
-		.VAlign(VAlign_Center)
+		.VAlign(VAlign_Top)
 		.HAlign(HAlign_Center)
 		.Padding(0.0f, 0.0f, 8.0f, 0.0f)
 		[

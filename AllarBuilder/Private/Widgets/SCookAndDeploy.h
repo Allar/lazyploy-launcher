@@ -22,7 +22,13 @@ public:
 	*/
 	void Construct(const FArguments& InArgs, TSharedRef<FAllarBuilderClient> InClient, const TSharedRef<ISlateStyle>& InStyle);
 
+	bool IsCookingEnabled() const;
+	FReply StartCook();
+
 private:
 
 	TSharedPtr<FAllarBuilderClient> Client;
+
+	// Widgets
+	TSharedPtr<class SCookProgress> CookProgress;
 };
