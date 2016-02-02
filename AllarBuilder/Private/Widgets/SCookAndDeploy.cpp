@@ -14,14 +14,19 @@ void SCookAndDeploy::Construct(const FArguments& InArgs, TSharedRef<FAllarBuilde
 	[
 		SNew(SHorizontalBox)
 		+ SHorizontalBox::Slot()
-		.FillWidth(1.0f)
+		.AutoWidth()
 		.VAlign(VAlign_Top)
 		.HAlign(HAlign_Center)
 		.Padding(0.0f, 0.0f, 8.0f, 0.0f)
 		[
-			SNew(STextBlock)
-			.Text(LOCTEXT("CookAndDeploy", "Cook"))
-			.TextStyle(InStyle, TEXT("Section.Label"))
+			SNew(SBox)
+			.HAlign(HAlign_Center)
+			.WidthOverride(100)
+			[
+				SNew(STextBlock)
+				.Text(LOCTEXT("CookAndDeploy", "Cook"))
+				.TextStyle(InStyle, TEXT("Section.Label"))
+			]
 		]
 		+ SHorizontalBox::Slot()
 		.FillWidth(5.0f)
@@ -111,6 +116,7 @@ void SCookAndDeploy::Construct(const FArguments& InArgs, TSharedRef<FAllarBuilde
 						[
 							SAssignNew(PakCheckboxOption, SCheckboxOption, InStyle)
 							.LabelText(LOCTEXT("UsePakFiles", "Use .pak"))
+							.CheckboxState(ECheckBoxState::Checked)
 							.RightAlignCheckBox(true)
 						]
 						// Compress?
@@ -120,6 +126,7 @@ void SCookAndDeploy::Construct(const FArguments& InArgs, TSharedRef<FAllarBuilde
 						[
 							SAssignNew(CompressCheckboxOption, SCheckboxOption, InStyle)
 							.LabelText(LOCTEXT("Compress", "Compress"))
+							.CheckboxState(ECheckBoxState::Checked)
 							.RightAlignCheckBox(true)
 						]
 						// Iterate?
@@ -138,16 +145,115 @@ void SCookAndDeploy::Construct(const FArguments& InArgs, TSharedRef<FAllarBuilde
 						[
 							SAssignNew(StripVersionCheckboxOption, SCheckboxOption, InStyle)
 							.LabelText(LOCTEXT("StripVersion", "StripVersion"))
+							.CheckboxState(ECheckBoxState::Checked)
 							.RightAlignCheckBox(true)
 						]
-						// Row spacer		
-						+ SGridPanel::Slot(0, 3)
+					]
+				]
+			]
+			// Post Cook Options
+			+ SVerticalBox::Slot()
+			.AutoHeight()
+			.Padding(0.0f, 8.0f, 0.0f, 0.0f)
+			[
+				SNew(SBorder)
+				.HAlign(HAlign_Left)
+				.BorderImage(FCoreStyle::Get().GetBrush("ToolPanel.GroupBorder"))
+				.Padding(8.0f)
+				[
+					SNew(SBox)
+					.WidthOverride(650)
+					[
+						SNew(SGridPanel)
+						.FillColumn(0, 1)
+						.FillColumn(1, 1)
+						.FillColumn(2, 1)
+						.FillColumn(3, 1)
+						.FillColumn(4, 1)
+						// Windows Server Steam Fix
+						+ SGridPanel::Slot(0, 0)
+						.VAlign(VAlign_Center)
+						.HAlign(HAlign_Left)
+						.ColumnSpan(2)
 						[
-							SNew(SSpacer)
-							.Size(FVector2D(8, 8))
+							SAssignNew(WinServerSteamFixCheckboxOption, SCheckboxOption, InStyle)
+							.LabelText(LOCTEXT("WinServerSteamFix", "Fix for Steam WinServer Binaries"))
+							.CheckboxState(ECheckBoxState::Checked)
 						]
+						// Linux Server Steam Fix
+						+ SGridPanel::Slot(2, 0)
+						.VAlign(VAlign_Center)
+						.HAlign(HAlign_Left)
+						[
+							SAssignNew(LinuxServerSteamFixCheckboxOption, SCheckboxOption, InStyle)
+							.LabelText(LOCTEXT("LinuxServerSteamFix", "Linux?"))
+							.CheckboxState(ECheckBoxState::Checked)
+						]
+					]
+				]
+			]
+			// Post Stage
+			+ SVerticalBox::Slot()
+			.AutoHeight()
+			.Padding(0.0f, 8.0f, 0.0f, 0.0f)
+			[
+				SNew(SBorder)
+				.HAlign(HAlign_Left)
+				.BorderImage(FCoreStyle::Get().GetBrush("ToolPanel.GroupBorder"))
+				.Padding(8.0f)
+				[
+					SNew(SBox)
+					.WidthOverride(650)
+					[
+						SNew(SGridPanel)
+						.FillColumn(0, 1)
+						.FillColumn(1, 1)
+						.FillColumn(2, 1)
+						.FillColumn(3, 1)
+						.FillColumn(4, 1)
+						// Zip Builds
+						+ SGridPanel::Slot(0, 0)
+						.VAlign(VAlign_Center)
+						.HAlign(HAlign_Left)
+						[
+							SAssignNew(ZipBuildCheckboxOption, SCheckboxOption, InStyle)
+							.LabelText(LOCTEXT("ZipBuilds", "Zip Builds"))
+							.CheckboxState(ECheckBoxState::Checked)
+						]
+						// Deploy to Build Manager
+						+ SGridPanel::Slot(1, 0)
+						.VAlign(VAlign_Center)
+						.HAlign(HAlign_Left)
+						[
+							SAssignNew(DeployToBuildManagerCheckboxOption, SCheckboxOption, InStyle)
+							.IsEnabled(false)
+							.LabelText(LOCTEXT("DeployToBuildManager", "Deploy to Build Manager"))
+							.CheckboxState(ECheckBoxState::Checked)
+						]
+					]
+				]
+			]
+			// Start Cook
+			+ SVerticalBox::Slot()
+			.AutoHeight()
+			.Padding(0.0f, 8.0f, 0.0f, 0.0f)
+			[
+				SNew(SBorder)
+				.HAlign(HAlign_Left)
+				.BorderImage(FCoreStyle::Get().GetBrush("ToolPanel.GroupBorder"))
+				.Padding(8.0f)
+				[
+					SNew(SBox)
+					.WidthOverride(650)
+					[
+						SNew(SGridPanel)
+						.FillColumn(0, 1)
+						.FillColumn(1, 1)
+						.FillColumn(2, 1)
+						.FillColumn(3, 1)
+						.FillColumn(4, 1)
 						// Begin Cook Button
-						+ SGridPanel::Slot(0,4)
+						+ SGridPanel::Slot(0, 4)
 						.ColumnSpan(5)
 						[
 							SNew(SButton)
@@ -177,10 +283,17 @@ void SCookAndDeploy::Construct(const FArguments& InArgs, TSharedRef<FAllarBuilde
 
 bool SCookAndDeploy::IsCookingEnabled() const
 {
+	// Ensure at least one platform is selected
+	if (!(WindowsCheckboxOption->CheckBox->IsChecked() || WindowsServerCheckboxOption->CheckBox->IsChecked() || LinuxCheckboxOption->CheckBox->IsChecked() || LinuxServerCheckboxOption->CheckBox->IsChecked()))
+	{
+		return false;
+	}
+
 	if (CookProgress.IsValid())
 	{
 		return CookProgress->IsReadyForNewJob();
 	}
+
 	return false;
 }
 
@@ -194,6 +307,7 @@ FReply SCookAndDeploy::StartCook()
 		CookArgs += TEXT(" -project=\"") + Client->GetProjectPath() + TEXT("\"");
 		CookArgs += TEXT(" -noP4 -nocompileeditor -utf8output -cook -map= -stage -package -clientconfig=Development -serverconfig=Development");
 
+		// Prevent compiling of UAT if using a Rocket build
 		if (FRocketSupport::IsRocket())
 		{
 			CookArgs += TEXT(" -rocket -nocompile");

@@ -44,6 +44,15 @@ void FAllarBuilderClient::SetProjectPath(const FString NewProjectPath)
 	ProjectPath = NewProjectPath;
 }
 
+FString FAllarBuilderClient::GetProjectDir() const
+{
+	if (!ProjectPath.IsEmpty())
+	{
+		return FPaths::GetPath(ProjectPath);
+	}
+	return FString();
+}
+
 FString FAllarBuilderClient::GetProjectName() const
 {
 	if (!ProjectPath.IsEmpty())

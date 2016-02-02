@@ -21,7 +21,7 @@ IMPLEMENT_APPLICATION(AllarBuilder, "AllarBuilder");
 const float IdealTickRate = 30.f;
 
 /** Default main window size */
-const FVector2D InitialWindowDimensions(700, 560);
+const FVector2D InitialWindowDimensions(700, 660);
 
 void RunAllarBuilderClient(const TCHAR* CommandLine)
 {

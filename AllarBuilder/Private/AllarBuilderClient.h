@@ -38,6 +38,7 @@ public:
 	// Project options
 	FString GetProjectPath() const;
 	void SetProjectPath(const FString NewProjectPath);
+	FString GetProjectDir() const;
 	FString GetProjectName() const;
 
 	bool IsProjectSelected() const;

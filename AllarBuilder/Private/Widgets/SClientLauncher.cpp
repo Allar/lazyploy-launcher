@@ -12,14 +12,19 @@ void SClientLauncher::Construct(const FArguments& InArgs, TSharedRef<FAllarBuild
 	[
 		SNew(SHorizontalBox)
 		+ SHorizontalBox::Slot()
-		.FillWidth(1.0f)
+		.AutoWidth()
 		.VAlign(VAlign_Top)
 		.HAlign(HAlign_Center)
 		.Padding(0.0f, 0.0f, 8.0f, 0.0f)
 		[
-			SNew(STextBlock)
-			.Text(LOCTEXT("Clients", "Clients"))
-			.TextStyle(InStyle, TEXT("Section.Label"))
+			SNew(SBox)
+			.HAlign(HAlign_Center)
+			.WidthOverride(100)
+			[
+				SNew(STextBlock)
+				.Text(LOCTEXT("Clients", "Clients"))
+				.TextStyle(InStyle, TEXT("Section.Label"))
+			]
 		]
 		+ SHorizontalBox::Slot()
 		.FillWidth(5.0f)

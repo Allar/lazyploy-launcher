@@ -32,6 +32,7 @@ private:
 	// Widgets
 	TSharedPtr<class SCookProgress> CookProgress;
 
+	// Standard Cook Options
 	TSharedPtr<SCheckboxOption> WindowsCheckboxOption;
 	TSharedPtr<SCheckboxOption> WindowsServerCheckboxOption;
 	TSharedPtr<SCheckboxOption> LinuxCheckboxOption;
@@ -40,4 +41,12 @@ private:
 	TSharedPtr<SCheckboxOption> CompressCheckboxOption;
 	TSharedPtr<SCheckboxOption> IterateCheckboxOption;
 	TSharedPtr<SCheckboxOption> StripVersionCheckboxOption;
+
+	// Post Cook Options
+	TSharedPtr<SCheckboxOption> WinServerSteamFixCheckboxOption;
+	TSharedPtr<SCheckboxOption> LinuxServerSteamFixCheckboxOption;
+
+	// Post Stage Options
+	TSharedPtr<SCheckboxOption> ZipBuildCheckboxOption;
+	TSharedPtr<SCheckboxOption> DeployToBuildManagerCheckboxOption;
 };
