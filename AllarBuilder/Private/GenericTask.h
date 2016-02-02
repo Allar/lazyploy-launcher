@@ -75,12 +75,8 @@ public:
 
 		FPlatformProcess::CreatePipe(ReadPipe, WritePipe);
 
-		ProcessPath = FPaths::ConvertRelativePathToFull(ProcessPath);
-		FPaths::MakePlatformFilename(ProcessPath);
-
 		WorkingDirectory = FPaths::ConvertRelativePathToFull(WorkingDirectory);
 		FPaths::MakePlatformFilename(WorkingDirectory);
-
 
 		// Log this task's process
 		FString TaskStartDesc = FString::Printf(TEXT("Task starting up process: %s %s in working directory %s"), *ProcessPath, *ProcessArguments, *WorkingDirectory);
@@ -127,8 +123,6 @@ public:
 		Status = ELauncherTaskStatus::Busy;
 
 		StartTime = FDateTime::UtcNow();
-
-		FPlatformProcess::Sleep(0.5f);
 
 		TaskStarted.Broadcast(Name);
 		if (PerformTask())

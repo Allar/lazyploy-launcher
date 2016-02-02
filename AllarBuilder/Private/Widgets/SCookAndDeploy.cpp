@@ -211,8 +211,17 @@ void SCookAndDeploy::Construct(const FArguments& InArgs, TSharedRef<FAllarBuilde
 						.FillColumn(2, 1)
 						.FillColumn(3, 1)
 						.FillColumn(4, 1)
-						// Zip Builds
+						// Strip Debug Files
 						+ SGridPanel::Slot(0, 0)
+						.VAlign(VAlign_Center)
+						.HAlign(HAlign_Left)
+						[
+							SAssignNew(StripDebugFilesCheckboxOption, SCheckboxOption, InStyle)
+							.LabelText(LOCTEXT("StripDebugFiles", "Strip Debug"))
+							.CheckboxState(ECheckBoxState::Checked)
+						]
+						// Zip Builds
+						+ SGridPanel::Slot(1, 0)
 						.VAlign(VAlign_Center)
 						.HAlign(HAlign_Left)
 						[
@@ -221,7 +230,7 @@ void SCookAndDeploy::Construct(const FArguments& InArgs, TSharedRef<FAllarBuilde
 							.CheckboxState(ECheckBoxState::Checked)
 						]
 						// Deploy to Build Manager
-						+ SGridPanel::Slot(1, 0)
+						+ SGridPanel::Slot(2, 0)
 						.VAlign(VAlign_Center)
 						.HAlign(HAlign_Left)
 						[
@@ -303,6 +312,9 @@ FReply SCookAndDeploy::StartCook()
 	{
 		CookProgress->ClearTasks();
 
+		FString UATPath = FPaths::ConvertRelativePathToFull(Client->GetEngineBatchFilesPath() / TEXT("RunUAT.bat"));
+		FPaths::MakePlatformFilename(UATPath);
+
 		FString CookArgs = TEXT("BuildCookRun");
 		CookArgs += TEXT(" -project=\"") + Client->GetProjectPath() + TEXT("\"");
 		CookArgs += TEXT(" -noP4 -nocompileeditor -utf8output -cook -map= -stage -package -clientconfig=Development -serverconfig=Development");
@@ -348,25 +360,73 @@ FReply SCookAndDeploy::StartCook()
 			CookArgs += TEXT(" -compressed");
 		}
 
-		// Build Windows Task
-		if (WindowsCheckboxOption->CheckBox->IsChecked() || WindowsServerCheckboxOption->CheckBox->IsChecked())
+		bool bWindows = WindowsCheckboxOption->CheckBox->IsChecked();
+		bool bWindowsServer = WindowsServerCheckboxOption->CheckBox->IsChecked();
+		bool bLinux = LinuxCheckboxOption->CheckBox->IsChecked();
+		bool bLinuxServer = LinuxServerCheckboxOption->CheckBox->IsChecked();
+		bool bStripDebug = StripDebugFilesCheckboxOption->CheckBox->IsChecked();
+		bool bZipBuilds = ZipBuildCheckboxOption->CheckBox->IsChecked();
+
+		// Build Windows Tasks
+		if ( bWindows || bWindowsServer )
 		{
+			// Set up Cook task
 			FString PlatformString;
 			FString TaskDesc;
-			if (WindowsCheckboxOption->CheckBox->IsChecked())
+			if (bWindows)
 			{
 				PlatformString += TEXT(" -platform=Win64");
 				TaskDesc += TEXT("Win64");
 			}
 
-			if (WindowsServerCheckboxOption->CheckBox->IsChecked())
+			if (bWindowsServer)
 			{
 				PlatformString += TEXT(" -server -serverplatform=Win64");
 				TaskDesc += TaskDesc.Len() > 0 ? TEXT(" and ") : TEXT("");
 				TaskDesc += ("Win64 Server");
 			}
 
-			CookProgress->NewTask(Client->GetEngineBatchFilesPath() / TEXT("RunUAT.bat"), CookArgs + PlatformString, Client->GetEngineBatchFilesPath(), TEXT("WindowsCook"), TEXT("Cooking ") + TaskDesc);
+			CookProgress->NewTask(UATPath, CookArgs + PlatformString, Client->GetEngineBatchFilesPath(), TEXT("WindowsCook"), TEXT("Cooking ") + TaskDesc);
+
+			// Set up Post Cook Tasks
+			FString StagedBuildDir = Client->GetProjectDir() / TEXT("Saved/StagedBuilds");
+			
+			if (bWindows)
+			{
+				const FString PlatformDir = TEXT("WindowsNoEditor");
+				const FString BuildDir = StagedBuildDir / PlatformDir;
+				
+				if (bStripDebug)
+				{
+					FString CommandArgs = FString::Printf(TEXT("-nologo -noprofile -command \"& { get-childitem \"%s\" -include *.pdb -recurse | foreach ($_) {remove-item $_.fullname} }\""), *BuildDir);
+					CookProgress->NewTask(TEXT("powershell.exe"), CommandArgs, TEXT(""), TEXT("StripDebugWindows"), TEXT("Strip Debug Files for Windows"));
+				}
+				
+				if (bZipBuilds)
+				{
+					FPlatformFileManager::Get().GetPlatformFile().DeleteFile(*(FPaths::Combine(*StagedBuildDir, *(PlatformDir + TEXT(".zip")))));
+					FString CommandArgs = FString::Printf(TEXT("-nologo -noprofile -command \"& { Add-Type -A 'System.IO.Compression.FileSystem'; Try { [IO.Compression.ZipFile]::CreateFromDirectory('%s', '%s.zip'); } Catch { echo $_.Exception|format-list -force; exit 1; } }\""), *PlatformDir, *PlatformDir);
+					CookProgress->NewTask(TEXT("powershell.exe"), CommandArgs, StagedBuildDir, TEXT("ZipWindows"), TEXT("Zip Windows Build"));
+				}		
+			}
+			if (bWindowsServer)
+			{
+				const FString PlatformDir = TEXT("WindowsServer");
+				const FString BuildDir = StagedBuildDir / PlatformDir;
+
+				if (bStripDebug)
+				{
+					FString CommandArgs = FString::Printf(TEXT("-nologo -noprofile -command \"& { get-childitem \"%s\" -include *.pdb -recurse | foreach ($_) {remove-item $_.fullname} }\""), *BuildDir);
+					CookProgress->NewTask(TEXT("powershell.exe"), CommandArgs, TEXT(""), TEXT("StripDebugWindowsServer"), TEXT("Strip Debug Files for Windows Server"));
+				}
+				
+				if (bZipBuilds)
+				{
+					FPlatformFileManager::Get().GetPlatformFile().DeleteFile(*(FPaths::Combine(*StagedBuildDir, *(PlatformDir + TEXT(".zip")))));
+					FString CommandArgs = FString::Printf(TEXT("-nologo -noprofile -command \"& { Add-Type -A 'System.IO.Compression.FileSystem'; Try { [IO.Compression.ZipFile]::CreateFromDirectory('%s', '%s.zip'); } Catch { echo $_.Exception|format-list -force; exit 1; } }\""), *PlatformDir, *PlatformDir);
+					CookProgress->NewTask(TEXT("powershell.exe"), CommandArgs, StagedBuildDir, TEXT("ZipWindowsServer"), TEXT("Zip Windows Server Build"));
+				}
+			}
 		}
 
 		// Build Linux Task
@@ -387,7 +447,45 @@ FReply SCookAndDeploy::StartCook()
 				TaskDesc += ("Linux Server");
 			}
 
-			CookProgress->NewTask(Client->GetEngineBatchFilesPath() / TEXT("RunUAT.bat"), CookArgs + PlatformString, Client->GetEngineBatchFilesPath(), TEXT("LinuxCook"), TEXT("Cooking ") + TaskDesc);
+			CookProgress->NewTask(UATPath, CookArgs + PlatformString, Client->GetEngineBatchFilesPath(), TEXT("LinuxCook"), TEXT("Cooking ") + TaskDesc);
+		
+			// Set up Post Cook Tasks
+			FString StagedBuildDir = Client->GetProjectDir() / TEXT("Saved/StagedBuilds");
+
+			if (bLinux)
+			{
+				const FString PlatformDir = TEXT("LinuxNoEditor");
+				const FString BuildDir = StagedBuildDir / PlatformDir;
+
+				if (bStripDebug)
+				{
+					// @TODO: Strip Linux Debug Files
+				}
+
+				if (bZipBuilds)
+				{
+					FPlatformFileManager::Get().GetPlatformFile().DeleteFile(*(FPaths::Combine(*StagedBuildDir, *(PlatformDir + TEXT(".zip")))));
+					FString CommandArgs = FString::Printf(TEXT("-nologo -noprofile -command \"& { Add-Type -A 'System.IO.Compression.FileSystem'; Try { [IO.Compression.ZipFile]::CreateFromDirectory('%s', '%s.zip'); } Catch { echo $_.Exception|format-list -force; exit 1; } }\""), *PlatformDir, *PlatformDir);
+					CookProgress->NewTask(TEXT("powershell.exe"), CommandArgs, StagedBuildDir, TEXT("ZipLinux"), TEXT("Zip Linux Build"));
+				}
+			}
+			if (bLinuxServer)
+			{
+				const FString PlatformDir = TEXT("LinuxServer");
+				const FString BuildDir = StagedBuildDir / PlatformDir;
+
+				if (bStripDebug)
+				{
+					// @TODO: Strip Linux Debug Files
+				}
+
+				if (bZipBuilds)
+				{
+					FPlatformFileManager::Get().GetPlatformFile().DeleteFile(*(FPaths::Combine(*StagedBuildDir, *(PlatformDir + TEXT(".zip")))));
+					FString CommandArgs = FString::Printf(TEXT("-nologo -noprofile -command \"& { Add-Type -A 'System.IO.Compression.FileSystem'; Try { [IO.Compression.ZipFile]::CreateFromDirectory('%s', '%s.zip'); } Catch { echo $_.Exception|format-list -force; exit 1; } }\""), *PlatformDir, *PlatformDir);
+					CookProgress->NewTask(TEXT("powershell.exe"), CommandArgs, StagedBuildDir, TEXT("ZipLinuxServer"), TEXT("Zip Linux Server Build"));
+				}
+			}
 		}
 
 		CookProgress->ExecuteTasks();

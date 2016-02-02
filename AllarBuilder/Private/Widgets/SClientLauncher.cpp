@@ -61,7 +61,7 @@ void SClientLauncher::Construct(const FArguments& InArgs, TSharedRef<FAllarBuild
 						.Padding(8.0f, 0.0f, 8.0f, 0.0f)
 						[
 							SAssignNew(ListenServerCheckboxOption, SCheckboxOption, InStyle)
-							.LabelText(LOCTEXT("ListenServer", "Listen?"))
+							.LabelText(LOCTEXT("ListenServer", "Listen"))
 						]
 						// Auto Connect?
 						+ SHorizontalBox::Slot()
@@ -71,7 +71,7 @@ void SClientLauncher::Construct(const FArguments& InArgs, TSharedRef<FAllarBuild
 						.Padding(8.0f, 0.0f, 8.0f, 0.0f)
 						[
 							SAssignNew(AutoConnectCheckboxOption, SCheckboxOption, InStyle)
-							.LabelText(LOCTEXT("Join", "Join?"))
+							.LabelText(LOCTEXT("Join", "Join"))
 							.IsEnabled(this, &SClientLauncher::IsAutoConnectEnabled)
 						
 						]

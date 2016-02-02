@@ -47,6 +47,7 @@ private:
 	TSharedPtr<SCheckboxOption> LinuxServerSteamFixCheckboxOption;
 
 	// Post Stage Options
+	TSharedPtr<SCheckboxOption> StripDebugFilesCheckboxOption;
 	TSharedPtr<SCheckboxOption> ZipBuildCheckboxOption;
 	TSharedPtr<SCheckboxOption> DeployToBuildManagerCheckboxOption;
 };
