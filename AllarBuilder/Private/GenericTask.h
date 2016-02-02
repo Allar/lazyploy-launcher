@@ -74,6 +74,17 @@ public:
 		FString Line; // Holds last line of output from process
 
 		FPlatformProcess::CreatePipe(ReadPipe, WritePipe);
+
+		ProcessPath = FPaths::ConvertRelativePathToFull(ProcessPath);
+		FPaths::MakePlatformFilename(ProcessPath);
+
+		WorkingDirectory = FPaths::ConvertRelativePathToFull(WorkingDirectory);
+		FPaths::MakePlatformFilename(WorkingDirectory);
+
+
+		// Log this task's process
+		FString TaskStartDesc = FString::Printf(TEXT("Task starting up process: %s %s in working directory %s"), *ProcessPath, *ProcessArguments, *WorkingDirectory);
+		OnMessageRecieved().Broadcast(TaskStartDesc);
 		
 		// Start process
 		ProcessHandle = FPlatformProcess::CreateProc(*ProcessPath, *ProcessArguments, false, bHidden, bHidden, NULL, 0, WorkingDirectory.Len() > 0 ? *WorkingDirectory : nullptr, WritePipe);

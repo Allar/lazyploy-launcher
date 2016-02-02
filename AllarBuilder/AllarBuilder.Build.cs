@@ -13,20 +13,18 @@ public class AllarBuilder : ModuleRules
 		PrivateDependencyModuleNames.Add("Core");
 		PrivateDependencyModuleNames.Add("Projects");
 
-        if (Target.Platform != UnrealTargetPlatform.Linux)
-        {
-            PrivateDependencyModuleNames.AddRange(
-                new string[]
-                {
-                    "Slate",
-                    "SlateCore",
-                    "SlateReflector",
-                    "StandaloneRenderer",
-                    "MessageLog",
-                    "LauncherServices",
-                    "TargetPlatform",
-                }
-            );
-        }
+        PrivateDependencyModuleNames.AddRange(
+            new string[]
+            {
+                "Slate",
+                "SlateCore",
+                "SlateReflector",
+                "StandaloneRenderer",
+                "MessageLog",
+                "LauncherServices",
+                "TargetPlatform",
+                "SourceCodeAccess"
+            }
+        );
     }
 }

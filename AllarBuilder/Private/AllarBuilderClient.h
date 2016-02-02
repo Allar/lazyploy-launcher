@@ -33,6 +33,7 @@ public:
 	void RequestCloseWindow(const TSharedRef<SWindow>& Window);
 
 	FString GetEditorBinaryPath() const;
+	FString GetEngineBatchFilesPath() const;
 
 	// Project options
 	FString GetProjectPath() const;

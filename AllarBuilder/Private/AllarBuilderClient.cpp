@@ -29,6 +29,11 @@ FString FAllarBuilderClient::GetEditorBinaryPath() const
 	return FString("Not implemented for this platform.");
 }
 
+FString FAllarBuilderClient::GetEngineBatchFilesPath() const
+{
+	return FPaths::EngineDir() / TEXT("Build/BatchFiles");
+}
+
 FString FAllarBuilderClient::GetProjectPath() const
 {
 	return ProjectPath;

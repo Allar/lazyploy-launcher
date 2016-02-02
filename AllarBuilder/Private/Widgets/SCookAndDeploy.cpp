@@ -1,4 +1,5 @@
 #include "../AllarBuilderClientApp.h"
+#include "ISourceCodeAccessModule.h"
 #include "SClientLauncher.h"
 #include "SCookProgress.h"
 #include "SCookAndDeploy.h"
@@ -30,207 +31,135 @@ void SCookAndDeploy::Construct(const FArguments& InArgs, TSharedRef<FAllarBuilde
 			.AutoHeight()
 			[
 				SNew(SBorder)
+				.HAlign(HAlign_Left)
 				.BorderImage(FCoreStyle::Get().GetBrush("ToolPanel.GroupBorder"))
 				.Padding(8.0f)
 				[
-					SNew(SVerticalBox)
-					// Platforms
-					+ SVerticalBox::Slot()
+					SNew(SBox)
+					.WidthOverride(650)
 					[
-						SNew(SHorizontalBox)
-						+ SHorizontalBox::Slot()
+						SNew(SGridPanel)
+						.FillColumn(0, 0.5f)
+						.FillColumn(1, 1)
+						.FillColumn(2, 1)
+						.FillColumn(3, 1)
+						.FillColumn(4, 1)
+						// Platforms label
+						+ SGridPanel::Slot(0,0)
 						.VAlign(VAlign_Center)
 						.HAlign(HAlign_Left)
-						.Padding(0.0f, 0.0f, 16.0f, 0.0f)
-						.AutoWidth()
 						[
 							SNew(STextBlock)
 							.Text(LOCTEXT("Platforms", "Platforms:"))
 							.TextStyle(InStyle, TEXT("Section.Text"))
 						]
 						// Windows
-						+ SHorizontalBox::Slot()
+						+ SGridPanel::Slot(1,0)
 						.VAlign(VAlign_Center)
-						.HAlign(HAlign_Left)
-						.Padding(16.0f, 0.0f, 8.0f, 0.0f)
-						.AutoWidth()
+						.HAlign(HAlign_Fill)
 						[
-							SNew(STextBlock)
-							.Text(LOCTEXT("Windows", "Windows"))
-							.TextStyle(InStyle, TEXT("Section.Text"))
-						]
-						+ SHorizontalBox::Slot()
-						.AutoWidth()
-						.VAlign(VAlign_Center)
-						[
-							SNew(SCheckBox)
-							.IsChecked(ECheckBoxState::Unchecked)
-							//.OnCheckStateChanged(this, &SClientLauncher::OnListenServerChanged)
+							SAssignNew(WindowsCheckboxOption, SCheckboxOption, InStyle)
+							.LabelText(LOCTEXT("Windows", "Windows"))
+							.RightAlignCheckBox(true)
 						]
 						// WindowsServer
-						+ SHorizontalBox::Slot()
+						+ SGridPanel::Slot(2,0)
 						.VAlign(VAlign_Center)
-						.HAlign(HAlign_Left)
-						.Padding(16.0f, 0.0f, 8.0f, 0.0f)
-						.AutoWidth()
+						.HAlign(HAlign_Fill)
 						[
-							SNew(STextBlock)
-							.Text(LOCTEXT("WindowsServer", "WindowsServer"))
-							.TextStyle(InStyle, TEXT("Section.Text"))
-						]
-						+ SHorizontalBox::Slot()
-						.AutoWidth()
-						.VAlign(VAlign_Center)
-						[
-							SNew(SCheckBox)
-							.IsChecked(ECheckBoxState::Unchecked)
-							//.OnCheckStateChanged(this, &SClientLauncher::OnListenServerChanged)
+							SAssignNew(WindowsServerCheckboxOption, SCheckboxOption, InStyle)
+							.LabelText(LOCTEXT("WindowsServer", "WinServer"))
+							.RightAlignCheckBox(true)
 						]
 						// Linux
-						+ SHorizontalBox::Slot()
+						+ SGridPanel::Slot(3,0)
 						.VAlign(VAlign_Center)
-						.HAlign(HAlign_Left)
-						.Padding(16.0f, 0.0f, 8.0f, 0.0f)
-						.AutoWidth()
+						.HAlign(HAlign_Fill)
 						[
-							SNew(STextBlock)
-							.Text(LOCTEXT("Linux", "Linux"))
-							.TextStyle(InStyle, TEXT("Section.Text"))
-						]
-						+ SHorizontalBox::Slot()
-						.AutoWidth()
-						.VAlign(VAlign_Center)
-						[
-							SNew(SCheckBox)
-							.IsChecked(ECheckBoxState::Unchecked)
-							//.OnCheckStateChanged(this, &SClientLauncher::OnListenServerChanged)
+							SAssignNew(LinuxCheckboxOption, SCheckboxOption, InStyle)
+							.LabelText(LOCTEXT("Linux", "Linux"))
+							.RightAlignCheckBox(true)
 						]
 						// LinuxServer
-						+ SHorizontalBox::Slot()
+						+ SGridPanel::Slot(4,0)
+						.VAlign(VAlign_Center)
+						.HAlign(HAlign_Fill)
+						[
+							SAssignNew(LinuxServerCheckboxOption, SCheckboxOption, InStyle)
+							.LabelText(LOCTEXT("LinuxServer", "LinuxServer"))
+							.RightAlignCheckBox(true)
+						]
+						// Row spacer		
+						+ SGridPanel::Slot(0, 1)
+						[
+							SNew(SSpacer)
+							.Size(FVector2D(8, 8))
+						]
+						// Options label			
+						+ SGridPanel::Slot(0,2)
 						.VAlign(VAlign_Center)
 						.HAlign(HAlign_Left)
-						.Padding(16.0f, 0.0f, 8.0f, 0.0f)
-						.AutoWidth()
-						[
-							SNew(STextBlock)
-							.Text(LOCTEXT("LinuxServer", "LinuxServer"))
-							.TextStyle(InStyle, TEXT("Section.Text"))
-						]
-						+ SHorizontalBox::Slot()
-						.AutoWidth()
-						.VAlign(VAlign_Center)
-						[
-							SNew(SCheckBox)
-							.IsChecked(ECheckBoxState::Unchecked)
-							//.OnCheckStateChanged(this, &SClientLauncher::OnListenServerChanged)
-						]
-					]
-					// Cook Options
-					+ SVerticalBox::Slot()
-					.Padding(0.0f, 8.0f, 0.0f, 0.0f)
-					[
-						SNew(SHorizontalBox)
-						+ SHorizontalBox::Slot()
-						.VAlign(VAlign_Center)
-						.HAlign(HAlign_Left)
-						.Padding(0.0f, 0.0f, 16.0f, 0.0f)
-						.AutoWidth()
 						[
 							SNew(STextBlock)
 							.Text(LOCTEXT("Options", "Options:"))
 							.TextStyle(InStyle, TEXT("Section.Text"))
 						]
 						// Use Pak files?
-						+ SHorizontalBox::Slot()
+						+ SGridPanel::Slot(1,2)
 						.VAlign(VAlign_Center)
-						.HAlign(HAlign_Left)
-						.Padding(16.0f, 0.0f, 8.0f, 0.0f)
-						.AutoWidth()
+						.HAlign(HAlign_Fill)
 						[
-							SNew(STextBlock)
-							.Text(LOCTEXT("UsePakFiles", "Use .pak"))
-							.TextStyle(InStyle, TEXT("Section.Text"))
-						]
-						+ SHorizontalBox::Slot()
-						.AutoWidth()
-						.VAlign(VAlign_Center)
-						[
-							SNew(SCheckBox)
-							.IsChecked(ECheckBoxState::Unchecked)
-							//.OnCheckStateChanged(this, &SClientLauncher::OnListenServerChanged)
+							SAssignNew(PakCheckboxOption, SCheckboxOption, InStyle)
+							.LabelText(LOCTEXT("UsePakFiles", "Use .pak"))
+							.RightAlignCheckBox(true)
 						]
 						// Compress?
-						+ SHorizontalBox::Slot()
+						+ SGridPanel::Slot(2,2)
 						.VAlign(VAlign_Center)
-						.HAlign(HAlign_Left)
-						.Padding(16.0f, 0.0f, 8.0f, 0.0f)
-						.AutoWidth()
+						.HAlign(HAlign_Fill)
 						[
-							SNew(STextBlock)
-							.Text(LOCTEXT("Compress", "Compress?"))
-							.TextStyle(InStyle, TEXT("Section.Text"))
-						]
-						+ SHorizontalBox::Slot()
-						.AutoWidth()
-						.VAlign(VAlign_Center)
-						[
-							SNew(SCheckBox)
-							.IsChecked(ECheckBoxState::Unchecked)
-							//.OnCheckStateChanged(this, &SClientLauncher::OnListenServerChanged)
+							SAssignNew(CompressCheckboxOption, SCheckboxOption, InStyle)
+							.LabelText(LOCTEXT("Compress", "Compress"))
+							.RightAlignCheckBox(true)
 						]
 						// Iterate?
-						+ SHorizontalBox::Slot()
+						+ SGridPanel::Slot(3,2)
 						.VAlign(VAlign_Center)
-						.HAlign(HAlign_Left)
-						.Padding(16.0f, 0.0f, 8.0f, 0.0f)
-						.AutoWidth()
+						.HAlign(HAlign_Fill)
 						[
-							SNew(STextBlock)
-							.Text(LOCTEXT("Iterate", "Iterate?"))
-							.TextStyle(InStyle, TEXT("Section.Text"))
-						]
-						+ SHorizontalBox::Slot()
-						.AutoWidth()
-						.VAlign(VAlign_Center)
-						[
-							SNew(SCheckBox)
-							.IsChecked(ECheckBoxState::Unchecked)
-							//.OnCheckStateChanged(this, &SClientLauncher::OnListenServerChanged)
+							SAssignNew(IterateCheckboxOption, SCheckboxOption, InStyle)
+							.LabelText(LOCTEXT("Iterate", "Iterate"))
+							.RightAlignCheckBox(true)
 						]
 						// Strip Version?
-						+ SHorizontalBox::Slot()
+						+ SGridPanel::Slot(4,2)
 						.VAlign(VAlign_Center)
-						.HAlign(HAlign_Left)
-						.Padding(16.0f, 0.0f, 8.0f, 0.0f)
-						.AutoWidth()
+						.HAlign(HAlign_Fill)
 						[
-							SNew(STextBlock)
-							.Text(LOCTEXT("StripVersion", "StripVersion"))
-							.TextStyle(InStyle, TEXT("Section.Text"))
+							SAssignNew(StripVersionCheckboxOption, SCheckboxOption, InStyle)
+							.LabelText(LOCTEXT("StripVersion", "StripVersion"))
+							.RightAlignCheckBox(true)
 						]
-						+ SHorizontalBox::Slot()
-						.AutoWidth()
-						.VAlign(VAlign_Center)
+						// Row spacer		
+						+ SGridPanel::Slot(0, 3)
 						[
-							SNew(SCheckBox)
-							.IsChecked(ECheckBoxState::Unchecked)
-							//.OnCheckStateChanged(this, &SClientLauncher::OnListenServerChanged)
+							SNew(SSpacer)
+							.Size(FVector2D(8, 8))
 						]
-					]
-					// Begin Cook Button
-					+ SVerticalBox::Slot()
-					.AutoHeight()
-					.Padding(0.0f, 8.0f, 0.0f, 0.0f)
-					[
-						SNew(SButton)
-						.VAlign(VAlign_Center)
-						.HAlign(HAlign_Center)
-						.IsEnabled(this, &SCookAndDeploy::IsCookingEnabled)
-						.OnClicked(this, &SCookAndDeploy::StartCook)
-						.Content()
+						// Begin Cook Button
+						+ SGridPanel::Slot(0,4)
+						.ColumnSpan(5)
 						[
-							SNew(STextBlock)
-							.Text(LOCTEXT("StartCook", "Start Cook"))
+							SNew(SButton)
+							.VAlign(VAlign_Center)
+							.HAlign(HAlign_Center)
+							.IsEnabled(this, &SCookAndDeploy::IsCookingEnabled)
+							.OnClicked(this, &SCookAndDeploy::StartCook)
+							.Content()
+							[
+								SNew(STextBlock)
+								.Text(LOCTEXT("StartCook", "Start Cook"))
+							]
 						]
 					]
 				]
@@ -260,8 +189,93 @@ FReply SCookAndDeploy::StartCook()
 	if (CookProgress.IsValid() && CookProgress->IsReadyForNewJob())
 	{
 		CookProgress->ClearTasks();
-		CookProgress->NewTask(TEXT("C:/Windows/System32/mspaint.exe"), TEXT(""), TEXT(""), TEXT("Test Paint Task"), TEXT("Testing to see how this works"), false);
-		CookProgress->NewTask(TEXT("git"), TEXT(""), TEXT(""), TEXT("Second Task"), TEXT("Second test task"), false);
+
+		FString CookArgs = TEXT("BuildCookRun");
+		CookArgs += TEXT(" -project=\"") + Client->GetProjectPath() + TEXT("\"");
+		CookArgs += TEXT(" -noP4 -nocompileeditor -utf8output -cook -map= -stage -package -clientconfig=Development -serverconfig=Development");
+
+		if (FRocketSupport::IsRocket())
+		{
+			CookArgs += TEXT(" -rocket -nocompile");
+		}
+
+		// See if project has code that needs to be built
+		FString ProjectPath = FPaths::GetPath(Client->GetProjectPath());
+		TArray<FString> OutProjectCodeFilenames;
+		IFileManager::Get().FindFilesRecursive(OutProjectCodeFilenames, *(ProjectPath / TEXT("Source")), TEXT("*.h"), true, false, false);
+		IFileManager::Get().FindFilesRecursive(OutProjectCodeFilenames, *(ProjectPath / TEXT("Source")), TEXT("*.cpp"), true, false, false);
+		ISourceCodeAccessModule& SourceCodeAccessModule = FModuleManager::LoadModuleChecked<ISourceCodeAccessModule>("SourceCodeAccess");
+		if (OutProjectCodeFilenames.Num() > 0 && SourceCodeAccessModule.GetAccessor().CanAccessSourceCode())
+		{
+			CookArgs += TEXT(" -build");
+		}	
+
+		// Strip versions from content?
+		if (StripVersionCheckboxOption->CheckBox->IsChecked())
+		{
+			CookArgs += TEXT(" -unversionedcookedcontent");
+		}
+
+		// Use .pak files?
+		if (StripVersionCheckboxOption->CheckBox->IsChecked())
+		{
+			CookArgs += TEXT(" -pak");
+		}
+
+		// Iterative cook?
+		if (IterateCheckboxOption->CheckBox->IsChecked())
+		{
+			CookArgs += TEXT(" -iterativecooking");
+		}
+
+		// Compress build?
+		if (CompressCheckboxOption->CheckBox->IsChecked())
+		{
+			CookArgs += TEXT(" -compressed");
+		}
+
+		// Build Windows Task
+		if (WindowsCheckboxOption->CheckBox->IsChecked() || WindowsServerCheckboxOption->CheckBox->IsChecked())
+		{
+			FString PlatformString;
+			FString TaskDesc;
+			if (WindowsCheckboxOption->CheckBox->IsChecked())
+			{
+				PlatformString += TEXT(" -platform=Win64");
+				TaskDesc += TEXT("Win64");
+			}
+
+			if (WindowsServerCheckboxOption->CheckBox->IsChecked())
+			{
+				PlatformString += TEXT(" -server -serverplatform=Win64");
+				TaskDesc += TaskDesc.Len() > 0 ? TEXT(" and ") : TEXT("");
+				TaskDesc += ("Win64 Server");
+			}
+
+			CookProgress->NewTask(Client->GetEngineBatchFilesPath() / TEXT("RunUAT.bat"), CookArgs + PlatformString, Client->GetEngineBatchFilesPath(), TEXT("WindowsCook"), TEXT("Cooking ") + TaskDesc);
+		}
+
+		// Build Linux Task
+		if (LinuxCheckboxOption->CheckBox->IsChecked() || LinuxServerCheckboxOption->CheckBox->IsChecked())
+		{
+			FString PlatformString;
+			FString TaskDesc;
+			if (LinuxCheckboxOption->CheckBox->IsChecked())
+			{
+				PlatformString += TEXT(" -platform=Linux");
+				TaskDesc += TEXT("Linux");
+			}
+
+			if (LinuxServerCheckboxOption->CheckBox->IsChecked())
+			{
+				PlatformString += TEXT(" -server -serverplatform=Linux");
+				TaskDesc += TaskDesc.Len() > 0 ? TEXT(" and ") : TEXT("");
+				TaskDesc += ("Linux Server");
+			}
+
+			CookProgress->NewTask(Client->GetEngineBatchFilesPath() / TEXT("RunUAT.bat"), CookArgs + PlatformString, Client->GetEngineBatchFilesPath(), TEXT("LinuxCook"), TEXT("Cooking ") + TaskDesc);
+		}
+
 		CookProgress->ExecuteTasks();
 	}
 	

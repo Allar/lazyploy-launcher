@@ -48,8 +48,7 @@ void RunAllarBuilderClient(const TCHAR* CommandLine)
 
 	auto Window = FSlateApplication::Get().AddWindow(
 		SNew(SWindow)
-		.Title(NSLOCTEXT("AllarBuilder", "AllarBuilderClientAppName", "Allar's Unreal Engine 4 Development Launcher"))
-		//.SizingRule(ESizingRule::FixedSize)		
+		.Title(NSLOCTEXT("AllarBuilder", "AllarBuilderClientAppName", "Allar's Unreal Engine 4 Development Launcher"))	
 		.ClientSize(InitialWindowDimensions)
 		.SupportsMaximize(false)
 		[

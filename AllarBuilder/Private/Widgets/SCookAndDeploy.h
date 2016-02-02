@@ -31,4 +31,13 @@ private:
 
 	// Widgets
 	TSharedPtr<class SCookProgress> CookProgress;
+
+	TSharedPtr<SCheckboxOption> WindowsCheckboxOption;
+	TSharedPtr<SCheckboxOption> WindowsServerCheckboxOption;
+	TSharedPtr<SCheckboxOption> LinuxCheckboxOption;
+	TSharedPtr<SCheckboxOption> LinuxServerCheckboxOption;
+	TSharedPtr<SCheckboxOption> PakCheckboxOption;
+	TSharedPtr<SCheckboxOption> CompressCheckboxOption;
+	TSharedPtr<SCheckboxOption> IterateCheckboxOption;
+	TSharedPtr<SCheckboxOption> StripVersionCheckboxOption;
 };

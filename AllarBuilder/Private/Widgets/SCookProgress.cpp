@@ -43,7 +43,7 @@ void SCookProgress::Construct(const FArguments& InArgs, TSharedRef<FAllarBuilder
 		.Padding(0.0f, 8.0f, 0.0f, 0.0f)
 		[
 			SNew(SBox)
-			.HeightOverride(150)
+			.HeightOverride(80)
 			[
 			
 				SNew(SBorder)
