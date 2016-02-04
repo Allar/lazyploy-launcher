@@ -2,6 +2,7 @@
 #include "SCookProgress.h"
 #include "../STaskListRow.h"
 #include "../GenericTask.h"
+#include "../GenericProcessTask.h"
 #include "../GenericHttpUploadTask.h"
 #include "SGenericTaskMessageListRow.h"
 
@@ -308,9 +309,9 @@ void SCookProgress::AddTask(FGenericTaskPtr NewTask)
 	TaskListView->RequestListRefresh();
 }
 
-void SCookProgress::NewTask(const FString& InProcessPath, const FString& InProcessArguments, const FString& InWorkingDirectory, const FString& InName, const FString& InDesc, bool bInHidden /*= true*/)
+void SCookProgress::NewTask(const FString& InName, const FString& InDesc, const FString& InProcessPath, const FString& InProcessArguments, const FString& InWorkingDirectory, bool bInHidden /*= true*/)
 {
-	FGenericTaskPtr NewTask = MakeShareable(new FGenericTask(InProcessPath, InProcessArguments, InWorkingDirectory, InName, InDesc, bInHidden));
+	FGenericTaskPtr NewTask = MakeShareable(new FGenericProcessTask(InName, InDesc, InProcessPath, InProcessArguments, InWorkingDirectory, bInHidden));
 	NewTask->OnCompleted().AddRaw(this, &SCookProgress::HandleTaskCompleted);
 	NewTask->OnMessageRecieved().AddRaw(this, &SCookProgress::HandleTaskMessageReceived);
 	TaskList.Add(NewTask);

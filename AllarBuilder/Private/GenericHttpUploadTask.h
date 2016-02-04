@@ -9,7 +9,7 @@ class FGenericHttpUploadTask
 {
 public:
 	FGenericHttpUploadTask(const FString& InName, const FString& InDesc, const FString& InURL, const FString& InFilePath)
-		: FGenericTask(TEXT(""), TEXT(""), TEXT(""), InName, InDesc)
+		: FGenericTask(InName, InDesc)
 		, TaskFilePath(InFilePath)
 		, TaskURL(InURL)
 		, PayloadSize(0)
@@ -128,5 +128,4 @@ protected:
 
 	bool bHttpRequestFinished;
 	bool bUploadSucceeded;
-
 };

@@ -50,7 +50,7 @@ public:
 	
 	void ClearTasks();
 	void AddTask(FGenericTaskPtr NewTask);
-	void NewTask(const FString& InProcessPath, const FString& InProcessArguments, const FString& InWorkingDirectory, const FString& InName, const FString& InDesc, bool bInHidden = true);
+	void NewTask(const FString& InName, const FString& InDesc, const FString& InProcessPath, const FString& InProcessArguments, const FString& InWorkingDirectory,  bool bInHidden = true);
 	void NewTask(const FString& InName, const FString& InDesc, const FString& InURL, const FString& InFilePath);
 	void ExecuteTasks();
 	void CancelTasks();
