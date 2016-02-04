@@ -57,7 +57,7 @@ public:
 	*
 	* @param ChainState - State data of the task chain.
 	*/
-	void Execute()
+	virtual void Execute()
 	{
 		check(Status == ELauncherTaskStatus::Pending);
 
@@ -233,7 +233,7 @@ public:
 		return Result;
 	}
 
-private:
+protected:
 	
 	// Process information
 	FString ProcessPath;

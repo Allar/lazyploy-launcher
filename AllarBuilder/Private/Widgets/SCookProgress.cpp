@@ -2,6 +2,7 @@
 #include "SCookProgress.h"
 #include "../STaskListRow.h"
 #include "../GenericTask.h"
+#include "../GenericHttpUploadTask.h"
 #include "SGenericTaskMessageListRow.h"
 
 #define LOCTEXT_NAMESPACE "CookProgress"
@@ -310,6 +311,15 @@ void SCookProgress::AddTask(FGenericTaskPtr NewTask)
 void SCookProgress::NewTask(const FString& InProcessPath, const FString& InProcessArguments, const FString& InWorkingDirectory, const FString& InName, const FString& InDesc, bool bInHidden /*= true*/)
 {
 	FGenericTaskPtr NewTask = MakeShareable(new FGenericTask(InProcessPath, InProcessArguments, InWorkingDirectory, InName, InDesc, bInHidden));
+	NewTask->OnCompleted().AddRaw(this, &SCookProgress::HandleTaskCompleted);
+	NewTask->OnMessageRecieved().AddRaw(this, &SCookProgress::HandleTaskMessageReceived);
+	TaskList.Add(NewTask);
+	TaskListView->RequestListRefresh();
+}
+
+void SCookProgress::NewTask(const FString& InName, const FString& InDesc, const FString& InURL, const FString& InFilePath)
+{
+	FGenericTaskPtr NewTask = MakeShareable(new FGenericHttpUploadTask(InName, InDesc, InURL, InFilePath));
 	NewTask->OnCompleted().AddRaw(this, &SCookProgress::HandleTaskCompleted);
 	NewTask->OnMessageRecieved().AddRaw(this, &SCookProgress::HandleTaskMessageReceived);
 	TaskList.Add(NewTask);

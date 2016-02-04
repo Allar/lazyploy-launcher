@@ -23,7 +23,8 @@ public class AllarBuilder : ModuleRules
                 "MessageLog",
                 "LauncherServices",
                 "TargetPlatform",
-                "SourceCodeAccess"
+                "SourceCodeAccess",
+                "HTTP"
             }
         );
     }
