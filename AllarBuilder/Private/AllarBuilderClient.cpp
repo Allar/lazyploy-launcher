@@ -4,7 +4,10 @@
 
 #include "TaskGraphInterfaces.h"
 
+static FString _BuildUploadEndpoint = TEXT("");
+
 FAllarBuilderClient::FAllarBuilderClient()
+	: BuildUploadEndpoint(_BuildUploadEndpoint)
 {
 }
 
@@ -60,6 +63,11 @@ FString FAllarBuilderClient::GetProjectName() const
 		return FPaths::GetBaseFilename(ProjectPath);
 	}
 	return FString();
+}
+
+void FAllarBuilderClient::SetBuildUploadEndpoint(FString NewEndpoint)
+{
+	_BuildUploadEndpoint = NewEndpoint;
 }
 
 bool FAllarBuilderClient::IsProjectSelected() const

@@ -101,7 +101,6 @@ public:
 		
 		TSharedRef<IHttpRequest> HttpRequest = FHttpModule::Get().CreateRequest();
 		HttpRequest->SetHeader(TEXT("Content-Type"), TEXT("multipart/form-data; boundary=") + DataBoundary);
-		//HttpRequest->SetHeader(TEXT("Content-Transfer-Encoding"), TEXT("binary"));
 		HttpRequest->SetURL(TaskURL);
 		HttpRequest->SetVerb(TEXT("POST"));
 		HttpRequest->SetContent(Payload);
@@ -121,8 +120,8 @@ public:
 
 protected:
 
-	FString TaskURL;
-	FString TaskFilePath;
+	const FString& TaskURL;
+	const FString& TaskFilePath;
 
 	int32 PayloadSize; 
 
