@@ -309,9 +309,45 @@ void SCookProgress::AddTask(FGenericTaskPtr NewTask)
 	TaskListView->RequestListRefresh();
 }
 
-void SCookProgress::NewTask(const FString& InName, const FString& InDesc, const FString& InProcessPath, const FString& InProcessArguments, const FString& InWorkingDirectory, bool bInHidden /*= true*/)
+void SCookProgress::NewTask(const FString& InName, const FString& InDesc, const FString& InProcessPath, const FString& InProcessArguments, const FString& InWorkingDirectory, bool bInHidden /*= true*/, const FString& InBuildManagerURL /*= TEXT("") */, const FString& InBuildStatus /*= TEXT("") */)
 {
-	FGenericTaskPtr NewTask = MakeShareable(new FGenericProcessTask(InName, InDesc, InProcessPath, InProcessArguments, InWorkingDirectory, bInHidden));
+	class FGenericProcessTaskWithBuildStatusUpdate : public FGenericProcessTask
+	{
+	public:
+		FGenericProcessTaskWithBuildStatusUpdate(const FString& InName, const FString& InDesc, const FString& InProcessPath, const FString& InProcessArguments, const FString& InWorkingDirectory, TSharedPtr<FAllarBuilderClient> InClient, const FString InBuildManagerURL, const FString InBuildStatus, bool bInHidden = true)
+			: FGenericProcessTask(InName, InDesc, InProcessPath, InProcessArguments, InWorkingDirectory, bInHidden)
+			, Client(InClient)
+			, BuildManagerURL(InBuildManagerURL)
+			, Status(InBuildStatus)
+		{
+		}
+	protected:
+		virtual bool PerformTask() override
+		{
+			TSharedRef<IHttpRequest> HttpRequest = FHttpModule::Get().CreateRequest();
+			HttpRequest->SetHeader(TEXT("Content-Type"), TEXT("application/json"));
+			HttpRequest->SetURL(BuildManagerURL / TEXT("api/builds") / FString::FromInt(Client->BuildId));
+			HttpRequest->SetVerb(TEXT("PATCH"));
+			HttpRequest->SetContentAsString(FString::Printf(TEXT("{ \"status\": \"%s\" }"), *Status));
+			HttpRequest->ProcessRequest();
+			return FGenericProcessTask::PerformTask();
+		}
+	private:
+		TSharedPtr<FAllarBuilderClient> Client;
+		FString BuildManagerURL;
+		FString Status;
+	};
+
+	FGenericTaskPtr NewTask = nullptr;
+	if (InBuildManagerURL.Len() > 0 && InBuildStatus.Len() > 0)
+	{
+		NewTask = MakeShareable(new FGenericProcessTaskWithBuildStatusUpdate(InName, InDesc, InProcessPath, InProcessArguments, InWorkingDirectory, Client, InBuildManagerURL, InBuildStatus, bInHidden));
+	}
+	else
+	{
+		NewTask = MakeShareable(new FGenericProcessTask(InName, InDesc, InProcessPath, InProcessArguments, InWorkingDirectory, bInHidden));
+	}
+
 	NewTask->OnCompleted().AddRaw(this, &SCookProgress::HandleTaskCompleted);
 	NewTask->OnMessageRecieved().AddRaw(this, &SCookProgress::HandleTaskMessageReceived);
 	TaskList.Add(NewTask);

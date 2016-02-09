@@ -5,9 +5,11 @@
 #include "TaskGraphInterfaces.h"
 
 static FString _BuildUploadEndpoint = TEXT("");
+static FString _BuildManagerURL = TEXT("http://localhost/");
 
 FAllarBuilderClient::FAllarBuilderClient()
 	: BuildUploadEndpoint(_BuildUploadEndpoint)
+	, BuildManagerURL(_BuildManagerURL)
 {
 }
 
@@ -68,6 +70,11 @@ FString FAllarBuilderClient::GetProjectName() const
 void FAllarBuilderClient::SetBuildUploadEndpoint(FString NewEndpoint)
 {
 	_BuildUploadEndpoint = NewEndpoint;
+}
+
+void FAllarBuilderClient::SetBuildManagerURL(FString NewURL)
+{
+	_BuildManagerURL = NewURL;
 }
 
 bool FAllarBuilderClient::IsProjectSelected() const

@@ -344,7 +344,7 @@ FReply SCookAndDeploy::StartCook()
 		}
 
 		// Use .pak files?
-		if (StripVersionCheckboxOption->CheckBox->IsChecked())
+		if (PakCheckboxOption->CheckBox->IsChecked())
 		{
 			CookArgs += TEXT(" -pak");
 		}
@@ -369,18 +369,16 @@ FReply SCookAndDeploy::StartCook()
 		bool bZipBuilds = ZipBuildCheckboxOption->CheckBox->IsChecked();
 		bool bDeployToBuildManager = DeployToBuildManagerCheckboxOption->CheckBox->IsChecked();
 
-		FString ProjectEndpoint = FString::Printf(TEXT("http://localhost:3000/api/projects/%s"), *Client->GetProjectName());
-		FString ProjectUploadEndpoint = ProjectEndpoint / TEXT("build/upload");
+		FString ProjectUploadEndpoint = Client->BuildManagerURL / TEXT("build/upload");
 
 		if (bZipBuilds && bDeployToBuildManager)
 		{
 			class FGetNewBuildInfoTask : public FGenericHttpJsonTask
 			{
 			public:
-				FGetNewBuildInfoTask(TSharedPtr<FAllarBuilderClient> InClient, const FString& NewBuildEndpoint, FString InProjectUploadEndpoint)
-					: FGenericHttpJsonTask(TEXT("GetBuildInfo"), TEXT("Get Build Info from Build Manager"), NewBuildEndpoint)
+				FGetNewBuildInfoTask(TSharedPtr<FAllarBuilderClient> InClient, FString JsonBuildInfo)
+					: FGenericHttpJsonTask(TEXT("GetBuildInfo"), TEXT("Get Build Info from Build Manager"), InClient->BuildManagerURL / TEXT("api/builds"), TEXT("POST"), JsonBuildInfo)
 					, Client(InClient)
-					, UploadEndpoint(InProjectUploadEndpoint)
 				{
 				}
 			protected:
@@ -388,15 +386,11 @@ FReply SCookAndDeploy::StartCook()
 				{
 					if (FGenericHttpJsonTask::PerformTask())
 					{	
-						const TSharedPtr<FJsonObject>* BuildJson;
-						if (JsonObj->TryGetObjectField(TEXT("build"), BuildJson))
+						if (JsonObj->TryGetNumberField(TEXT("id"), Client->BuildId))
 						{
-							if ((*BuildJson)->TryGetNumberField(TEXT("id"), Client->BuildId))
-							{
-								Client->SetBuildUploadEndpoint(UploadEndpoint / FString::FromInt(Client->BuildId));
-								OnMessageRecieved().Broadcast(FString::Printf(TEXT("Successfully got new build info. Starting build with id: %d"), Client->BuildId));
-								return true;
-							}
+							Client->SetBuildUploadEndpoint(Client->BuildManagerURL / FString::FromInt(Client->BuildId));
+							OnMessageRecieved().Broadcast(FString::Printf(TEXT("Successfully got new build info. Starting build with id: %d"), Client->BuildId));
+							return true;
 						}
 					}
 
@@ -405,11 +399,18 @@ FReply SCookAndDeploy::StartCook()
 				}
 			private:
 				TSharedPtr<FAllarBuilderClient> Client;
-				FString UploadEndpoint;
 			};
 
-			FString BuildDesc = TEXT("Automated build test.");
-			CookProgress->AddTask(MakeShareable(new FGetNewBuildInfoTask(Client, ProjectEndpoint / TEXT("build/new") / BuildDesc, ProjectUploadEndpoint)));
+			TSharedPtr<FJsonObject> JsonObj = MakeShareable(new FJsonObject());
+			JsonObj->SetStringField(TEXT("project"), Client->GetProjectName());
+			JsonObj->SetStringField(TEXT("desc"), TEXT("Your face is smelly."));
+			JsonObj->SetStringField(TEXT("status"), TEXT("Started"));
+
+			FString BuildInfoJson;
+			const TSharedRef<TJsonWriter<>> JsonWriter = TJsonWriterFactory<>::Create(&BuildInfoJson);
+			FJsonSerializer::Serialize(JsonObj.ToSharedRef(), JsonWriter, true);
+
+			CookProgress->AddTask(MakeShareable(new FGetNewBuildInfoTask(Client, BuildInfoJson)));
 		}
 
 		// Build Windows Tasks
@@ -444,7 +445,7 @@ FReply SCookAndDeploy::StartCook()
 				if (bStripDebug)
 				{
 					FString CommandArgs = FString::Printf(TEXT("-nologo -noprofile -command \"& { get-childitem \"%s\" -include *.pdb -recurse | foreach ($_) {remove-item $_.fullname} }\""), *BuildDir);
-					CookProgress->NewTask(TEXT("StripDebugWindows"), TEXT("Strip Debug Files for Windows"), TEXT("powershell.exe"), CommandArgs, TEXT(""));
+					CookProgress->NewTask(TEXT("StripDebugWindows"), TEXT("Strip Debug Files for Windows"), TEXT("powershell.exe"), CommandArgs, TEXT(""), true, Client->BuildManagerURL, TEXT("Strip Debug Files for Windows"));
 				}
 				
 				if (bZipBuilds)
@@ -452,11 +453,11 @@ FReply SCookAndDeploy::StartCook()
 					static FString BuildArchivePath = FPaths::Combine(*StagedBuildDir, *(PlatformDir + TEXT(".zip")));
 					FPlatformFileManager::Get().GetPlatformFile().DeleteFile(*BuildArchivePath);
 					FString CommandArgs = FString::Printf(TEXT("-nologo -noprofile -command \"& { Add-Type -A 'System.IO.Compression.FileSystem'; Try { [IO.Compression.ZipFile]::CreateFromDirectory('%s', '%s.zip'); } Catch { echo $_.Exception|format-list -force; exit 1; } }\""), *PlatformDir, *PlatformDir);
-					CookProgress->NewTask(TEXT("ZipWindows"), TEXT("Zip Windows Build"), TEXT("powershell.exe"), CommandArgs, StagedBuildDir);
+					CookProgress->NewTask(TEXT("ZipWindows"), TEXT("Zip Windows Build"), TEXT("powershell.exe"), CommandArgs, StagedBuildDir, true, Client->BuildManagerURL, TEXT("Zip Windows Build"));
 
 					if (DeployToBuildManagerCheckboxOption->CheckBox->IsChecked())
 					{
-						CookProgress->NewTask(TEXT("UploadWindows"), TEXT("Upload Windows Build"), Client->BuildUploadEndpoint, BuildArchivePath);
+						//CookProgress->NewTask(TEXT("UploadWindows"), TEXT("Upload Windows Build"), Client->BuildUploadEndpoint, BuildArchivePath);
 					}
 				}		
 			}
@@ -468,7 +469,7 @@ FReply SCookAndDeploy::StartCook()
 				if (bStripDebug)
 				{
 					FString CommandArgs = FString::Printf(TEXT("-nologo -noprofile -command \"& { get-childitem \"%s\" -include *.pdb -recurse | foreach ($_) {remove-item $_.fullname} }\""), *BuildDir);
-					CookProgress->NewTask(TEXT("StripDebugWindowsServer"), TEXT("Strip Debug Files for Windows Server"), TEXT("powershell.exe"), CommandArgs, TEXT(""));
+					CookProgress->NewTask(TEXT("StripDebugWindowsServer"), TEXT("Strip Debug Files for Windows Server"), TEXT("powershell.exe"), CommandArgs, TEXT(""), true, Client->BuildManagerURL, TEXT("Strip Debug Files for Windows Server"));
 				}
 				
 				if (bZipBuilds)
@@ -476,11 +477,11 @@ FReply SCookAndDeploy::StartCook()
 					static FString BuildArchivePath = FPaths::Combine(*StagedBuildDir, *(PlatformDir + TEXT(".zip")));
 					FPlatformFileManager::Get().GetPlatformFile().DeleteFile(*BuildArchivePath);
 					FString CommandArgs = FString::Printf(TEXT("-nologo -noprofile -command \"& { Add-Type -A 'System.IO.Compression.FileSystem'; Try { [IO.Compression.ZipFile]::CreateFromDirectory('%s', '%s.zip'); } Catch { echo $_.Exception|format-list -force; exit 1; } }\""), *PlatformDir, *PlatformDir);
-					CookProgress->NewTask(TEXT("ZipWindowsServer"), TEXT("Zip Windows Server Build"), TEXT("powershell.exe"), CommandArgs, StagedBuildDir);
+					CookProgress->NewTask(TEXT("ZipWindowsServer"), TEXT("Zip Windows Server Build"), TEXT("powershell.exe"), CommandArgs, StagedBuildDir, true, Client->BuildManagerURL, TEXT("Zip Windows Server Build"));
 
 					if (DeployToBuildManagerCheckboxOption->CheckBox->IsChecked())
 					{
-						CookProgress->NewTask(TEXT("UploadWindowsServer"), TEXT("Upload Windows Server Build"), Client->BuildUploadEndpoint, BuildArchivePath);
+						CookProgress->NewTask(TEXT("UploadWindowsServer"), TEXT("Upload Windows Server Build"), Client->BuildUploadEndpoint, BuildArchivePath);// Client->BuildManagerURL, TEXT("Upload Windows Server Build"));
 					}
 				}
 			}
@@ -524,7 +525,7 @@ FReply SCookAndDeploy::StartCook()
 					static FString BuildArchivePath = FPaths::Combine(*StagedBuildDir, *(PlatformDir + TEXT(".zip")));
 					FPlatformFileManager::Get().GetPlatformFile().DeleteFile(*BuildArchivePath);
 					FString CommandArgs = FString::Printf(TEXT("-nologo -noprofile -command \"& { Add-Type -A 'System.IO.Compression.FileSystem'; Try { [IO.Compression.ZipFile]::CreateFromDirectory('%s', '%s.zip'); } Catch { echo $_.Exception|format-list -force; exit 1; } }\""), *PlatformDir, *PlatformDir);
-					CookProgress->NewTask(TEXT("ZipLinux"), TEXT("Zip Linux Build"), TEXT("powershell.exe"), CommandArgs, StagedBuildDir);
+					CookProgress->NewTask(TEXT("ZipLinux"), TEXT("Zip Linux Build"), TEXT("powershell.exe"), CommandArgs, StagedBuildDir, true, Client->BuildManagerURL, TEXT("Zip Linux Build"));
 
 					if (DeployToBuildManagerCheckboxOption->CheckBox->IsChecked())
 					{
@@ -547,7 +548,7 @@ FReply SCookAndDeploy::StartCook()
 					static FString BuildArchivePath = FPaths::Combine(*StagedBuildDir, *(PlatformDir + TEXT(".zip")));
 					FPlatformFileManager::Get().GetPlatformFile().DeleteFile(*BuildArchivePath);
 					FString CommandArgs = FString::Printf(TEXT("-nologo -noprofile -command \"& { Add-Type -A 'System.IO.Compression.FileSystem'; Try { [IO.Compression.ZipFile]::CreateFromDirectory('%s', '%s.zip'); } Catch { echo $_.Exception|format-list -force; exit 1; } }\""), *PlatformDir, *PlatformDir);
-					CookProgress->NewTask(TEXT("ZipLinuxServer"), TEXT("Zip Linux Server Build"), TEXT("powershell.exe"), CommandArgs, StagedBuildDir);
+					CookProgress->NewTask(TEXT("ZipLinuxServer"), TEXT("Zip Linux Server Build"), TEXT("powershell.exe"), CommandArgs, StagedBuildDir, true, Client->BuildManagerURL, TEXT("Zip Linux Server Build"));
 
 					if (DeployToBuildManagerCheckboxOption->CheckBox->IsChecked())
 					{

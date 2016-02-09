@@ -29,7 +29,8 @@ public:
 			return;
 		}
 
-		if (HttpResponse->GetResponseCode() == 200)
+		// Is response code a 2XX success code?
+		if (200 <= HttpResponse->GetResponseCode() && HttpResponse->GetResponseCode() < 300)
 		{
 			FString ResponseContent = HttpResponse->GetContentAsString();
 

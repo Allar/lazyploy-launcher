@@ -42,6 +42,7 @@ public:
 	FString GetProjectName() const;
 
 	void SetBuildUploadEndpoint(FString NewEndpoint);
+	void SetBuildManagerURL(FString NewURL);
 
 	bool IsProjectSelected() const;
 	FReply LaunchEditor();
@@ -54,4 +55,5 @@ public:
 	// Current build info for Build Manager
 	int32 BuildId;
 	FString& BuildUploadEndpoint;
+	FString& BuildManagerURL;
 };
