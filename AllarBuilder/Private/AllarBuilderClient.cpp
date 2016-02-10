@@ -10,6 +10,7 @@ static FString _BuildManagerURL = TEXT("http://localhost/");
 FAllarBuilderClient::FAllarBuilderClient()
 	: BuildUploadEndpoint(_BuildUploadEndpoint)
 	, BuildManagerURL(_BuildManagerURL)
+	, bUpdateBuildStatus(false)
 {
 }
 

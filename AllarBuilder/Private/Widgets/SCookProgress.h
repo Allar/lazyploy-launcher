@@ -41,6 +41,7 @@ public:
 	bool IsBusy() const;
 	bool IsCancelling() const;
 	bool IsPending() const;
+	bool Failed() const;
 
 	bool IsCancelButtonEnabled() const;
 	FReply HandleCancelButtonClicked();
@@ -50,10 +51,12 @@ public:
 	
 	void ClearTasks();
 	void AddTask(FGenericTaskPtr NewTask);
-	void NewTask(const FString& InName, const FString& InDesc, const FString& InProcessPath, const FString& InProcessArguments, const FString& InWorkingDirectory, bool bInHidden = true, const FString& InBuildManagerURL = TEXT(""), const FString& InBuildStatus = TEXT(""));
+	void NewTask(const FString& InName, const FString& InDesc, const FString& InProcessPath, const FString& InProcessArguments, const FString& InWorkingDirectory, bool bInHidden = true);
 	void NewTask(const FString& InName, const FString& InDesc, const FString& InURL, const FString& InFilePath);
 	void ExecuteTasks();
 	void CancelTasks();
+
+	void UpdateBuildManagerStatus(const FString& BuildStatus);
 
 	bool IsClearLogEnabled() const;
 	FReply HandleClearLogButtonClicked();

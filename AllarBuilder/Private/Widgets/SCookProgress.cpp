@@ -232,6 +232,18 @@ bool SCookProgress::IsPending() const
 	return false;
 }
 
+bool SCookProgress::Failed() const
+{
+	for (int32 i = 0; i < TaskList.Num(); ++i)
+	{
+		if (TaskList[i]->GetStatus() == ELauncherTaskStatus::Failed)
+		{
+			return true;
+		}
+	}
+	return false;
+}
+
 bool SCookProgress::IsCancelButtonEnabled() const
 {
 	return IsBusy() && !IsCancelling();
@@ -278,17 +290,36 @@ void SCookProgress::HandleTaskCompleted(const FString& CompletedTaskName)
 		}
 	}
 
+	// Completed but there are more tasks to do
 	if (CompletedTaskIndex != -1 && (CompletedTaskIndex + 1) < TaskList.Num())
 	{
 		if (TaskList[CompletedTaskIndex]->GetStatus() == ELauncherTaskStatus::Completed)
 		{
-			FPlatformProcess::Sleep(0.25);
+			UpdateBuildManagerStatus(TaskList[CompletedTaskIndex + 1]->GetDesc());
 			TaskList[CompletedTaskIndex + 1]->Execute();
+			return;
 		}
-		else
+	}
+	
+	// No more tasks left
+	if (CompletedTaskIndex != -1 && (CompletedTaskIndex + 1) >= TaskList.Num())
+	{
+		if (TaskList[CompletedTaskIndex]->GetStatus() == ELauncherTaskStatus::Completed)
 		{
-			HandleCancelButtonClicked();
+			UpdateBuildManagerStatus(TEXT("Completed"));
+			return;
 		}
+	}
+
+	// Should only reach here if current task fails or is canceled
+	if (TaskList[CompletedTaskIndex]->GetStatus() == ELauncherTaskStatus::Failed)
+	{
+		UpdateBuildManagerStatus(TEXT("Failed: ") + TaskList[CompletedTaskIndex]->GetDesc());
+		HandleCancelButtonClicked();
+	}
+	else if (TaskList[CompletedTaskIndex]->GetStatus() == ELauncherTaskStatus::Canceled && !Failed())
+	{
+		UpdateBuildManagerStatus(TEXT("Canceled"));
 	}
 }
 
@@ -309,45 +340,10 @@ void SCookProgress::AddTask(FGenericTaskPtr NewTask)
 	TaskListView->RequestListRefresh();
 }
 
-void SCookProgress::NewTask(const FString& InName, const FString& InDesc, const FString& InProcessPath, const FString& InProcessArguments, const FString& InWorkingDirectory, bool bInHidden /*= true*/, const FString& InBuildManagerURL /*= TEXT("") */, const FString& InBuildStatus /*= TEXT("") */)
+void SCookProgress::NewTask(const FString& InName, const FString& InDesc, const FString& InProcessPath, const FString& InProcessArguments, const FString& InWorkingDirectory, bool bInHidden /*= true*/)
 {
-	class FGenericProcessTaskWithBuildStatusUpdate : public FGenericProcessTask
-	{
-	public:
-		FGenericProcessTaskWithBuildStatusUpdate(const FString& InName, const FString& InDesc, const FString& InProcessPath, const FString& InProcessArguments, const FString& InWorkingDirectory, TSharedPtr<FAllarBuilderClient> InClient, const FString InBuildManagerURL, const FString InBuildStatus, bool bInHidden = true)
-			: FGenericProcessTask(InName, InDesc, InProcessPath, InProcessArguments, InWorkingDirectory, bInHidden)
-			, Client(InClient)
-			, BuildManagerURL(InBuildManagerURL)
-			, Status(InBuildStatus)
-		{
-		}
-	protected:
-		virtual bool PerformTask() override
-		{
-			TSharedRef<IHttpRequest> HttpRequest = FHttpModule::Get().CreateRequest();
-			HttpRequest->SetHeader(TEXT("Content-Type"), TEXT("application/json"));
-			HttpRequest->SetURL(BuildManagerURL / TEXT("api/builds") / FString::FromInt(Client->BuildId));
-			HttpRequest->SetVerb(TEXT("PATCH"));
-			HttpRequest->SetContentAsString(FString::Printf(TEXT("{ \"status\": \"%s\" }"), *Status));
-			HttpRequest->ProcessRequest();
-			return FGenericProcessTask::PerformTask();
-		}
-	private:
-		TSharedPtr<FAllarBuilderClient> Client;
-		FString BuildManagerURL;
-		FString Status;
-	};
-
 	FGenericTaskPtr NewTask = nullptr;
-	if (InBuildManagerURL.Len() > 0 && InBuildStatus.Len() > 0)
-	{
-		NewTask = MakeShareable(new FGenericProcessTaskWithBuildStatusUpdate(InName, InDesc, InProcessPath, InProcessArguments, InWorkingDirectory, Client, InBuildManagerURL, InBuildStatus, bInHidden));
-	}
-	else
-	{
-		NewTask = MakeShareable(new FGenericProcessTask(InName, InDesc, InProcessPath, InProcessArguments, InWorkingDirectory, bInHidden));
-	}
-
+	NewTask = MakeShareable(new FGenericProcessTask(InName, InDesc, InProcessPath, InProcessArguments, InWorkingDirectory, bInHidden));
 	NewTask->OnCompleted().AddRaw(this, &SCookProgress::HandleTaskCompleted);
 	NewTask->OnMessageRecieved().AddRaw(this, &SCookProgress::HandleTaskMessageReceived);
 	TaskList.Add(NewTask);
@@ -389,6 +385,19 @@ void SCookProgress::CancelTasks()
 	for (int32 i = 0; i < TaskList.Num(); ++i)
 	{
 		TaskList[i]->Cancel();
+	}
+}
+
+void SCookProgress::UpdateBuildManagerStatus(const FString& BuildStatus)
+{
+	if (Client->bUpdateBuildStatus)
+	{
+		TSharedRef<IHttpRequest> HttpRequest = FHttpModule::Get().CreateRequest();
+		HttpRequest->SetHeader(TEXT("Content-Type"), TEXT("application/json"));
+		HttpRequest->SetURL(Client->BuildManagerURL / TEXT("api/builds") / FString::FromInt(Client->BuildId));
+		HttpRequest->SetVerb(TEXT("PATCH"));
+		HttpRequest->SetContentAsString(FString::Printf(TEXT("{ \"status\": \"%s\" }"), *BuildStatus));
+		HttpRequest->ProcessRequest();
 	}
 }
 

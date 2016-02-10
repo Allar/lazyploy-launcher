@@ -56,4 +56,6 @@ public:
 	int32 BuildId;
 	FString& BuildUploadEndpoint;
 	FString& BuildManagerURL;
+
+	bool bUpdateBuildStatus;
 };

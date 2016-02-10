@@ -23,6 +23,8 @@ public:
 	void Construct(const FArguments& InArgs, TSharedRef<FAllarBuilderClient> InClient, const TSharedRef<ISlateStyle>& InStyle);
 
 	bool IsCookingEnabled() const;
+	bool IsBuildManagerEnabled() const;
+	bool IsBuildManagerSettingsEnabled() const;
 	FReply StartCook();
 
 private:
@@ -50,4 +52,8 @@ private:
 	TSharedPtr<SCheckboxOption> StripDebugFilesCheckboxOption;
 	TSharedPtr<SCheckboxOption> ZipBuildCheckboxOption;
 	TSharedPtr<SCheckboxOption> DeployToBuildManagerCheckboxOption;
+
+	// Build Manager Options
+	TSharedPtr<SEditableTextBox> BuildManagerUrlTextBox;
+	TSharedPtr<SEditableTextBox> BuildDescriptionTextBox;
 };
