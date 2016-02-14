@@ -5,89 +5,141 @@
 #include "AllarBuilder.h"
 
 #include "AllarBuilderClient.h"
-#include "SAllarBuilderClient.h"
+#include "Widgets/SAllarBuilderClient.h"
 #include "AllarBuilderClientStyle.h"
-#include "ISlateReflectorModule.h"
-
-#include "MainLoopTiming.h"
+#include "SDockTab.h"
 
 #include "RequiredProgramMainCPPInclude.h"
+
+#include "AutomationController.h"
+#include "ISourceCodeAccessModule.h"
 
 DEFINE_LOG_CATEGORY_STATIC(LogAllarBuilder, Log, All);
 
 IMPLEMENT_APPLICATION(AllarBuilder, "AllarBuilder");
 
-/** Average tick rate the app aims for */
-const float IdealTickRate = 30.f;
+#define IDEAL_FRAMERATE 60;
 
-/** Default main window size */
-const FVector2D InitialWindowDimensions(700, 660);
+namespace LazyployLauncher
+{
+	TSharedPtr<FTabManager::FLayout> ApplicationLayout;
+}
+
+TSharedPtr<FAllarBuilderClient> AllarBuilderClient = nullptr;
+TSharedPtr<FSlateStyleSet> Style = nullptr;
+
+TSharedRef<SDockTab> SpawnLazyployLauncherTab(const FSpawnTabArgs& SpawnTabArgs)
+{
+	const TSharedRef<SDockTab> DockTab = SNew(SDockTab)
+		.TabRole(ETabRole::MajorTab);
+
+	DockTab->SetContent(SNew(SAllarBuilderClient, AllarBuilderClient.ToSharedRef(), Style.ToSharedRef()));
+
+	return DockTab;
+}
 
 void RunAllarBuilderClient(const TCHAR* CommandLine)
 {
-	GEngineLoop.PreInit(CommandLine);
+	FString NewCommandLine = CommandLine;
 
-	UE_LOG(LogAllarBuilder, Display, TEXT("Hello World"));
+	if (!FParse::Param(*NewCommandLine, TEXT("-Messaging")))
+	{
+		NewCommandLine += TEXT(" -Messaging");
+	}
 
-	// Set up the main ticker
-	FMainLoopTiming MainLoop(IdealTickRate);
+	GEngineLoop.PreInit(*NewCommandLine);
+	FModuleManager::Get().StartProcessingNewlyLoadedObjects();
+
+	FString LazyployFrontendLayoutIni = FPaths::GetPath(GEngineIni) + "/Layout.ini";
+	// load required modules
+	FModuleManager::Get().LoadModuleChecked("EditorStyle");
+	FModuleManager::Get().LoadModuleChecked("Messaging");
+
+	IAutomationControllerModule& AutomationControllerModule = FModuleManager::LoadModuleChecked<IAutomationControllerModule>("AutomationController");
+	AutomationControllerModule.Init();
+
+	// load plug-ins
+	IPluginManager::Get().LoadModulesForEnabledPlugins(ELoadingPhase::PreDefault);
+
+	FModuleManager::Get().LoadModule("ProfilerClient");
+	FModuleManager::Get().LoadModule("ProjectLauncher");
+	FModuleManager::Get().LoadModule("SessionFrontend");
 
 	// crank up a normal Slate application using the platform's standalone renderer
 	FSlateApplication::InitializeAsStandaloneApplication(GetStandardStandaloneRenderer());
+	FGlobalTabmanager::Get()->SetApplicationTitle(NSLOCTEXT("LazyployLauncher", "AppTitle", "Lazyploy Launcher"));
 
 	// Prepare the custom Slate styles
 	FAllarBuilderClientStyle::Initialize();
 
 	// Create the main implementation object
-	TSharedRef<FAllarBuilderClient> AllarBuilderClient = MakeShareable(new FAllarBuilderClient());
+	AllarBuilderClient = MakeShareable(new FAllarBuilderClient());
+	Style = FAllarBuilderClientStyle::GetPtr().ToSharedRef();
 
-	TSharedRef<FSlateStyleSet> Style = FAllarBuilderClientStyle::GetPtr().ToSharedRef();
+	// Register tab
+	auto& TabSpawnerEntry = FGlobalTabmanager::Get()->RegisterNomadTabSpawner(FName("LazyployLauncher"), FOnSpawnTab::CreateStatic(&SpawnLazyployLauncherTab))
+		.SetDisplayName(NSLOCTEXT("LazyployLauncher", "TabTitle", "Lazyploy Launcher"))
+		.SetTooltipText(NSLOCTEXT("LazyployLauncher", "TabTooltipText", "Open the Lazyploy Launcher tab."));
 
-	// open up the app window	
-	TSharedRef<SAllarBuilderClient> ClientControl = SNew(SAllarBuilderClient, AllarBuilderClient, Style);
+	// restore application layout
+	TSharedRef<FTabManager::FLayout> NewLayout = FTabManager::NewLayout("LazyployLauncherLayout_v1.0")
+		->AddArea
+		(
+			FTabManager::NewArea(800.f, 800.0f)
+			->Split
+			(
+				FTabManager::NewStack()
+				->AddTab(FName("SessionFrontend"), ETabState::OpenedTab)
+				->AddTab(FName("LazyployLauncher"), ETabState::OpenedTab)
+			)
+		);
 
-	auto Window = FSlateApplication::Get().AddWindow(
-		SNew(SWindow)
-		.Title(NSLOCTEXT("AllarBuilder", "AllarBuilderClientAppName", "Allar's Unreal Engine 4 Development Launcher"))	
-		.ClientSize(InitialWindowDimensions)
-		.SupportsMaximize(false)
-		[
-			ClientControl
-		]
-	);
+	LazyployLauncher::ApplicationLayout = FLayoutSaveRestore::LoadFromConfig(LazyployFrontendLayoutIni, NewLayout);
+	FGlobalTabmanager::Get()->RestoreFrom(LazyployLauncher::ApplicationLayout.ToSharedRef(), TSharedPtr<SWindow>());
 
-	// Debugging code
-	if (true)
-	{
-		FSlateApplication::Get().AddWindow(
-			SNew(SWindow)
-			.ClientSize(FVector2D(720, 600))
-			.ScreenPosition(FVector2D(0, 1080))
-			.AutoCenter(EAutoCenter::None)
-			[
-				FModuleManager::LoadModuleChecked<ISlateReflectorModule>("SlateReflector").GetWidgetReflector()
-			]);
-	}
-
-	// Setting focus seems to have to happen after the Window has been added
-	FSlateApplication::Get().ClearKeyboardFocus(EFocusCause::Cleared);
+	// enter main loop
+	double DeltaTime = 0.0;
+	double LastTime = FPlatformTime::Seconds();
+	const float IdealFrameTime = 1.0f / IDEAL_FRAMERATE;
 
 	// loop until the app is ready to quit
 	while (!GIsRequestingExit)
 	{
-		MainLoop.Tick();
+		FTaskGraphInterface::Get().ProcessThreadUntilIdle(ENamedThreads::GameThread);
+		FSlateApplication::Get().PumpMessages();
+		FSlateApplication::Get().Tick();
+		FTicker::GetCoreTicker().Tick(DeltaTime);
+
+		// throttle frame rate
+		FPlatformProcess::Sleep(FMath::Max<float>(0.0f, IdealFrameTime - (FPlatformTime::Seconds() - LastTime)));
+
+		double CurrentTime = FPlatformTime::Seconds();
+		DeltaTime = CurrentTime - LastTime;
+		LastTime = CurrentTime;
+
+		FStats::AdvanceFrame(false);
+
+		GLog->FlushThreadedLogs();
 	}
 
-	Window->SetRequestDestroyWindowOverride(FRequestDestroyWindowOverride::CreateSP(AllarBuilderClient, &FAllarBuilderClient::RequestCloseWindow));
 
 	// Clean up the custom styles
 	FAllarBuilderClientStyle::Shutdown();
 
-	// Close down the Slate application
+	// save application layout
+	FLayoutSaveRestore::SaveToConfig(LazyployFrontendLayoutIni, LazyployLauncher::ApplicationLayout.ToSharedRef());
+	GConfig->Flush(false, LazyployFrontendLayoutIni);
+
+	// shut down application
 	FSlateApplication::Shutdown();
 
+	// shut down
 	FEngineLoop::AppPreExit();
-	FTaskGraphInterface::Shutdown();
+	FModuleManager::Get().UnloadModulesAtShutdown();
 
-	FEngineLoop::AppExit();
+#if STATS
+	FThreadStats::StopThread();
+#endif
+
+	FTaskGraphInterface::Shutdown();
 }

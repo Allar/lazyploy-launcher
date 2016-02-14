@@ -440,6 +440,12 @@ FReply SCookAndDeploy::StartCook()
 			CookArgs += TEXT(" -compressed");
 		}
 
+		// No debug info?
+		if (StripDebugFilesCheckboxOption->CheckBox->IsChecked())
+		{
+			CookArgs += TEXT(" -nodebuginfo");
+		}
+
 		bool bWindows = WindowsCheckboxOption->CheckBox->IsChecked();
 		bool bWindowsServer = WindowsServerCheckboxOption->CheckBox->IsChecked();
 		bool bLinux = LinuxCheckboxOption->CheckBox->IsChecked();

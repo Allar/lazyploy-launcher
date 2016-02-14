@@ -1,6 +1,6 @@
 #include "../AllarBuilderClientApp.h"
 #include "SCookProgress.h"
-#include "../STaskListRow.h"
+#include "STaskListRow.h"
 #include "../GenericTask.h"
 #include "../GenericProcessTask.h"
 #include "../GenericHttpUploadTask.h"

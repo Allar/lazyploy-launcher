@@ -10,22 +10,44 @@ public class AllarBuilder : ModuleRules
 
 		PrivateIncludePaths.Add("Runtime/Launch/Private");		// For LaunchEngineLoop.cpp include
 
-		PrivateDependencyModuleNames.Add("Core");
-		PrivateDependencyModuleNames.Add("Projects");
-
         PrivateDependencyModuleNames.AddRange(
             new string[]
             {
+                "AutomationController",
+                "Core",
+                "CoreUObject",
+                "Projects",
+                "DeviceManager",
                 "Slate",
                 "SlateCore",
                 "SlateReflector",
                 "StandaloneRenderer",
+                "Messaging",
+                "Profiler",
+                "ProfilerClient",
+                "SessionFrontend",
+                "SessionServices",
                 "MessageLog",
                 "LauncherServices",
                 "TargetPlatform",
+                "TargetDeviceServices",
                 "SourceCodeAccess",
-                "HTTP"
+                "HTTP",
+                "JSON",
+                "InputCore",
+                "Networking",
+                "Sockets",
+                "UdpMessaging"
             }
         );
+
+        if (Target.Platform == UnrealTargetPlatform.Mac)
+        {
+            PrivateDependencyModuleNames.Add("XCodeSourceCodeAccess");
+        }
+        else if (Target.Platform == UnrealTargetPlatform.Win64)
+        {
+            PrivateDependencyModuleNames.Add("VisualStudioSourceCodeAccess");
+        }
     }
 }

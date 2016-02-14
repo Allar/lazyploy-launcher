@@ -1,6 +1,6 @@
 // Copyright 1998-2015 Epic Games, Inc. All Rights Reserved.
 
-#include "AllarBuilderClientApp.h"
+#include "../AllarBuilderClientApp.h"
 #include "STaskListRow.h"
 #include "SThrobber.h"
 

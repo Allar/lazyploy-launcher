@@ -86,6 +86,7 @@ bool FAllarBuilderClient::IsProjectSelected() const
 FReply FAllarBuilderClient::LaunchEditor()
 {
 	uint32 ProcessID;
-	FPlatformProcess::CreateProc(*GetEditorBinaryPath(), *GetProjectPath(), true, false, false, &ProcessID, 0, nullptr, nullptr);
+	FString Args = GetProjectPath() + TEXT(" -SessionFilter=Lazyploy");
+	FPlatformProcess::CreateProc(*GetEditorBinaryPath(), *Args, true, false, false, &ProcessID, 0, nullptr, nullptr);
 	return FReply::Handled();
 }

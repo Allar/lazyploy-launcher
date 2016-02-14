@@ -17,7 +17,6 @@ void FAllarBuilderClientStyle::Initialize()
 void FAllarBuilderClientStyle::Shutdown()
 {
 	FSlateStyleRegistry::UnRegisterSlateStyle(*StyleSet);
-	ensure(StyleSet.IsUnique());
 	StyleSet.Reset();
 }
 
