@@ -646,7 +646,7 @@ FReply SCookAndDeploy::StartCook()
 				
 				if (bStripDebug)
 				{
-					FString CommandArgs = FString::Printf(TEXT("-nologo -noprofile -command \"& { get-childitem \"%s\" -include *.pdb -recurse | foreach ($_) {remove-item $_.fullname} }\""), *BuildDir);
+					FString CommandArgs = FString::Printf(TEXT("-nologo -noprofile -command \"& { get-childitem \"'%s'\" -include *.pdb -recurse | foreach ($_) {remove-item \"$_.fullname\"} }\""), *BuildDir);
 					CookProgress->NewTask(TEXT("StripDebugWindows"), TEXT("Strip Debug Files for Windows"), TEXT("powershell.exe"), CommandArgs, TEXT(""));
 				}
 				
@@ -670,7 +670,7 @@ FReply SCookAndDeploy::StartCook()
 
 				if (bStripDebug)
 				{
-					FString CommandArgs = FString::Printf(TEXT("-nologo -noprofile -command \"& { get-childitem \"%s\" -include *.pdb -recurse | foreach ($_) {remove-item $_.fullname} }\""), *BuildDir);
+					FString CommandArgs = FString::Printf(TEXT("-nologo -noprofile -command \"& { get-childitem \"'%s'\" -include *.pdb -recurse | foreach ($_) {remove-item $_.fullname} }\""), *BuildDir);
 					CookProgress->NewTask(TEXT("StripDebugWindowsServer"), TEXT("Strip Debug Files for Windows Server"), TEXT("powershell.exe"), CommandArgs, TEXT(""));
 				}
 				
