@@ -22,6 +22,9 @@ public:
 	*/
 	void Construct(const FArguments& InArgs, TSharedRef<FLazyployLauncherClient> InClient, const TSharedRef<ISlateStyle>& InStyle);
 
+	void LoadOptionsFromConfig();
+	void SaveOptionsToConfig();
+
 	bool IsCookingEnabled() const;
 	bool IsBuildManagerEnabled() const;
 	bool IsBuildManagerSettingsEnabled() const;

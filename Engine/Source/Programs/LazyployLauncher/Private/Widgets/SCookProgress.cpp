@@ -15,31 +15,6 @@ void SCookProgress::Construct(const FArguments& InArgs, TSharedRef<FLazyployLaun
 	ChildSlot
 	[
 		SNew(SVerticalBox)
-		//+ SVerticalBox::Slot()
-		//.AutoHeight()
-		//[
-		//	SNew(SBorder)
-		//	.BorderImage(FCoreStyle::Get().GetBrush("ToolPanel.GroupBorder"))
-		//	.Padding(8.0f)
-		//	[
-		//		SNew(SVerticalBox)
-		//		+ SVerticalBox::Slot()
-		//		.AutoHeight()
-		//		[
-		//			SNew(STextBlock)
-		//			.Text(this, &SCookProgress::HandleProgressTextBlockText)
-		//		]
-
-		//		+ SVerticalBox::Slot()
-		//		.AutoHeight()
-		//		.Padding(0.0f, 4.0f, 0.0f, 0.0f)
-		//		[
-		//			SAssignNew(ProgressBar, SProgressBar)
-		//			.Percent(this, &SCookProgress::HandleProgressBarPercent)
-		//		]
-		//	]
-		//]
-
 		+ SVerticalBox::Slot()
 		.AutoHeight()
 		.Padding(0.0f, 8.0f, 0.0f, 0.0f)
@@ -395,7 +370,7 @@ void SCookProgress::UpdateBuildManagerStatus(const FString& BuildStatus)
 		TSharedRef<IHttpRequest> HttpRequest = FHttpModule::Get().CreateRequest();
 		HttpRequest->SetHeader(TEXT("Content-Type"), TEXT("application/json"));
 		HttpRequest->SetURL(Client->BuildManagerURL / TEXT("api/builds") / FString::FromInt(Client->BuildId));
-		HttpRequest->SetVerb(TEXT("PATCH"));
+		HttpRequest->SetVerb(TEXT("POST"));
 		HttpRequest->SetContentAsString(FString::Printf(TEXT("{ \"status\": \"%s\" }"), *BuildStatus));
 		HttpRequest->ProcessRequest();
 	}

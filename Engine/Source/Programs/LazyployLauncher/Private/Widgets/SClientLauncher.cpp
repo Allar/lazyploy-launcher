@@ -177,6 +177,62 @@ void SClientLauncher::Construct(const FArguments& InArgs, TSharedRef<FLazyployLa
 			]
 		]
 	];
+
+	LoadOptionsFromConfig();
+}
+
+// Probably the worst way to do this.
+// @TODO: Make a data storage class
+void SClientLauncher::LoadOptionsFromConfig()
+{
+	// Default Client Options
+	bool bListenServerEnabled = false;
+	bool bAutoConnectEnabled = false;
+	int32 NumClients = 1;
+	int32 ResX = 1280;
+	int32 ResY = 720;
+	int32 PosX = 0;
+	int32 PosY = 0;
+	FText ClientArgs = FText::GetEmpty();
+
+	// Load Default Client Options
+	GConfig->GetBool(TEXT("Lazyploy.Clients"), TEXT("bListenServer"), bListenServerEnabled, GEngineIni);
+	GConfig->GetBool(TEXT("Lazyploy.Clients"), TEXT("bAutoConnect"), bAutoConnectEnabled, GEngineIni);
+	GConfig->GetInt(TEXT("Lazyploy.Clients"), TEXT("NumClients"), NumClients, GEngineIni);
+	GConfig->GetInt(TEXT("Lazyploy.Clients"), TEXT("ResX"), ResX, GEngineIni);
+	GConfig->GetInt(TEXT("Lazyploy.Clients"), TEXT("ResY"), ResY, GEngineIni);
+	GConfig->GetInt(TEXT("Lazyploy.Clients"), TEXT("PosX"), PosX, GEngineIni);
+	GConfig->GetInt(TEXT("Lazyploy.Clients"), TEXT("PosY"), PosY, GEngineIni);
+	GConfig->GetText(TEXT("Lazyploy.Clients"), TEXT("Args"), ClientArgs, GEngineIni);
+
+// @HACK: SetIsChecked would not take a bool. Is there a better way?
+#define BOOL_TO_CHECKED(inBool) inBool ? ECheckBoxState::Checked : ECheckBoxState::Unchecked
+
+	ListenServerCheckboxOption->CheckBox->SetIsChecked(BOOL_TO_CHECKED(bListenServerEnabled));
+	AutoConnectCheckboxOption->CheckBox->SetIsChecked(BOOL_TO_CHECKED(bAutoConnectEnabled));
+	NumberOfClientsSpinBoxOption->SpinBox->SetValue(NumClients);
+	ResXSpinBoxOption->SpinBox->SetValue(ResX);
+	ResYSpinBoxOption->SpinBox->SetValue(ResY);
+	PosXSpinBoxOption->SpinBox->SetValue(PosX);
+	PosYSpinBoxOption->SpinBox->SetValue(PosY);
+	ClientArgumentsTextBox->SetText(ClientArgs);
+
+#undef BOOL_TO_CHECKED
+
+}
+
+void SClientLauncher::SaveOptionsToConfig()
+{
+	GConfig->SetBool(TEXT("Lazyploy.Clients"), TEXT("bListenServer"), ListenServerCheckboxOption->CheckBox->IsChecked(), GEngineIni);
+	GConfig->SetBool(TEXT("Lazyploy.Clients"), TEXT("bAutoConnect"), AutoConnectCheckboxOption->CheckBox->IsChecked(), GEngineIni);
+	GConfig->SetInt(TEXT("Lazyploy.Clients"), TEXT("NumClients"), NumberOfClientsSpinBoxOption->SpinBox->GetValue(), GEngineIni);
+	GConfig->SetInt(TEXT("Lazyploy.Clients"), TEXT("ResX"), ResXSpinBoxOption->SpinBox->GetValue(), GEngineIni);
+	GConfig->SetInt(TEXT("Lazyploy.Clients"), TEXT("ResY"), ResYSpinBoxOption->SpinBox->GetValue(), GEngineIni);
+	GConfig->SetInt(TEXT("Lazyploy.Clients"), TEXT("PosX"), PosXSpinBoxOption->SpinBox->GetValue(), GEngineIni);
+	GConfig->SetInt(TEXT("Lazyploy.Clients"), TEXT("PosY"), PosYSpinBoxOption->SpinBox->GetValue(), GEngineIni);
+	GConfig->SetText(TEXT("Lazyploy.Clients"), TEXT("Args"), ClientArgumentsTextBox->GetText(), GEngineIni);	
+
+	GConfig->Flush(false, GEngineIni);
 }
 
 bool SClientLauncher::IsAutoConnectEnabled() const
@@ -186,6 +242,8 @@ bool SClientLauncher::IsAutoConnectEnabled() const
 
 FReply SClientLauncher::LaunchClients()
 {
+	SaveOptionsToConfig();
+
 	FString EditorBinaryPath = Client->GetEditorBinaryPath();
 	uint32 ProcessID;
 

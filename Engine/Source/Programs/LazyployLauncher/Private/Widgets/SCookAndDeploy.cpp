@@ -360,6 +360,108 @@ void SCookAndDeploy::Construct(const FArguments& InArgs, TSharedRef<FLazyployLau
 			]
 		]
 	];
+
+	LoadOptionsFromConfig();
+}
+
+// Probably the worst way to do this.
+// @TODO: Make a data storage class
+void SCookAndDeploy::LoadOptionsFromConfig()
+{
+	// Default Cook Options
+	bool bWindowsEnabled = false;
+	bool bWindowsServerEnabled = false;
+	bool bLinuxEnabled = false;
+	bool bLinuxServerEnabled = false;
+	bool bPakEnabled = true;
+	bool bCompressEnabled = true;
+	bool bIterateEnabled = true;
+	bool bStripVersionEnabled = true;
+
+	// Load Default Cook Options
+	GConfig->GetBool(TEXT("Lazyploy.Platforms"), TEXT("bWindows"), bWindowsEnabled, GEngineIni);
+	GConfig->GetBool(TEXT("Lazyploy.Platforms"), TEXT("bWindowsServer"), bWindowsServerEnabled, GEngineIni);
+	GConfig->GetBool(TEXT("Lazyploy.Platforms"), TEXT("bLinux"), bLinuxEnabled, GEngineIni);
+	GConfig->GetBool(TEXT("Lazyploy.Platforms"), TEXT("bLinuxServer"), bLinuxServerEnabled, GEngineIni);
+	GConfig->GetBool(TEXT("Lazyploy.Platforms"), TEXT("bPak"), bPakEnabled, GEngineIni);
+	GConfig->GetBool(TEXT("Lazyploy.Platforms"), TEXT("bCompress"), bCompressEnabled, GEngineIni);
+	GConfig->GetBool(TEXT("Lazyploy.Platforms"), TEXT("bIterate"), bIterateEnabled, GEngineIni);
+	GConfig->GetBool(TEXT("Lazyploy.Platforms"), TEXT("bStripVersion"), bStripVersionEnabled, GEngineIni);
+
+// @HACK: SetIsChecked would not take a bool. Is there a better way?
+#define BOOL_TO_CHECKED(inBool) inBool ? ECheckBoxState::Checked : ECheckBoxState::Unchecked
+
+	WindowsCheckboxOption->CheckBox->SetIsChecked(BOOL_TO_CHECKED(bWindowsEnabled));
+	WindowsServerCheckboxOption->CheckBox->SetIsChecked(BOOL_TO_CHECKED(bWindowsServerEnabled));
+	LinuxCheckboxOption->CheckBox->SetIsChecked(BOOL_TO_CHECKED(bLinuxEnabled));
+	LinuxServerCheckboxOption->CheckBox->SetIsChecked(BOOL_TO_CHECKED(bLinuxServerEnabled));
+	PakCheckboxOption->CheckBox->SetIsChecked(BOOL_TO_CHECKED(bPakEnabled));
+	CompressCheckboxOption->CheckBox->SetIsChecked(BOOL_TO_CHECKED(bCompressEnabled));
+	IterateCheckboxOption->CheckBox->SetIsChecked(BOOL_TO_CHECKED(bIterateEnabled));
+	StripVersionCheckboxOption->CheckBox->SetIsChecked(BOOL_TO_CHECKED(bStripVersionEnabled));
+
+	// Default Steam Fix Options
+	bool bSteamFixWinServerEnabled = false;
+	bool bSteamFixLinuxServerEnabled = false;
+
+	GConfig->GetBool(TEXT("Lazyploy.SteamFix"), TEXT("bWindows"), bSteamFixWinServerEnabled, GEngineIni);
+	GConfig->GetBool(TEXT("Lazyploy.SteamFix"), TEXT("bLinux"), bSteamFixLinuxServerEnabled, GEngineIni);
+
+	WinServerSteamFixCheckboxOption->CheckBox->SetIsChecked(BOOL_TO_CHECKED(bSteamFixWinServerEnabled));
+	LinuxServerSteamFixCheckboxOption->CheckBox->SetIsChecked(BOOL_TO_CHECKED(bSteamFixLinuxServerEnabled));
+
+	// Default Post Stage Options
+	bool bStripDebugFilesEnabled = true;
+	bool bZipBuildsEnabled = true;
+	bool bDeployToLazyployEnabled = false;
+
+	GConfig->GetBool(TEXT("Lazyploy.PostStage"), TEXT("bStripDebug"), bStripDebugFilesEnabled, GEngineIni);
+	GConfig->GetBool(TEXT("Lazyploy.PostStage"), TEXT("bZip"), bZipBuildsEnabled, GEngineIni);
+	GConfig->GetBool(TEXT("Lazyploy.PostStage"), TEXT("bDeployLazyploy"), bDeployToLazyployEnabled, GEngineIni);
+
+	StripDebugFilesCheckboxOption->CheckBox->SetIsChecked(BOOL_TO_CHECKED(bStripDebugFilesEnabled));
+	ZipBuildCheckboxOption->CheckBox->SetIsChecked(BOOL_TO_CHECKED(bZipBuildsEnabled));
+	DeployToBuildManagerCheckboxOption->CheckBox->SetIsChecked(BOOL_TO_CHECKED(bDeployToLazyployEnabled));
+
+	// Default Lazyploy options
+	FText LazyployUrl = FText::FromString(TEXT("http://localhost/"));
+	FText BuildDescription = FText::FromString(TEXT(""));
+
+	GConfig->GetText(TEXT("Lazyploy.PostStage"), TEXT("LazyployUrl"), LazyployUrl, GEngineIni);
+	GConfig->GetText(TEXT("Lazyploy.PostStage"), TEXT("BuildDescription"), BuildDescription, GEngineIni);
+
+	BuildManagerUrlTextBox->SetText(LazyployUrl);
+	BuildDescriptionTextBox->SetText(BuildDescription);
+
+#undef BOOL_TO_CHECKED
+}
+
+void SCookAndDeploy::SaveOptionsToConfig()
+{
+	// Save Default Cook Options
+	GConfig->SetBool(TEXT("Lazyploy.Platforms"), TEXT("bWindows"), WindowsCheckboxOption->CheckBox->IsChecked(), GEngineIni);
+	GConfig->SetBool(TEXT("Lazyploy.Platforms"), TEXT("bWindowsServer"), WindowsServerCheckboxOption->CheckBox->IsChecked(), GEngineIni);
+	GConfig->SetBool(TEXT("Lazyploy.Platforms"), TEXT("bLinux"), LinuxCheckboxOption->CheckBox->IsChecked(), GEngineIni);
+	GConfig->SetBool(TEXT("Lazyploy.Platforms"), TEXT("bLinuxServer"), LinuxServerCheckboxOption->CheckBox->IsChecked(), GEngineIni);
+	GConfig->SetBool(TEXT("Lazyploy.Platforms"), TEXT("bPak"), PakCheckboxOption->CheckBox->IsChecked(), GEngineIni);
+	GConfig->SetBool(TEXT("Lazyploy.Platforms"), TEXT("bCompress"), CompressCheckboxOption->CheckBox->IsChecked(), GEngineIni);
+	GConfig->SetBool(TEXT("Lazyploy.Platforms"), TEXT("bIterate"), IterateCheckboxOption->CheckBox->IsChecked(), GEngineIni);
+	GConfig->SetBool(TEXT("Lazyploy.Platforms"), TEXT("bStripVersion"), StripVersionCheckboxOption->CheckBox->IsChecked(), GEngineIni);
+
+	// Default Steam Fix Options
+	GConfig->SetBool(TEXT("Lazyploy.SteamFix"), TEXT("bWindows"), WinServerSteamFixCheckboxOption->CheckBox->IsChecked(), GEngineIni);
+	GConfig->SetBool(TEXT("Lazyploy.SteamFix"), TEXT("bLinux"), LinuxServerSteamFixCheckboxOption->CheckBox->IsChecked(), GEngineIni);
+
+	// Default Post Stage Options
+	GConfig->SetBool(TEXT("Lazyploy.PostStage"), TEXT("bStripDebug"), StripDebugFilesCheckboxOption->CheckBox->IsChecked(), GEngineIni);
+	GConfig->SetBool(TEXT("Lazyploy.PostStage"), TEXT("bZip"), ZipBuildCheckboxOption->CheckBox->IsChecked(), GEngineIni);
+	GConfig->SetBool(TEXT("Lazyploy.PostStage"), TEXT("bDeployLazyploy"), DeployToBuildManagerCheckboxOption->CheckBox->IsChecked(), GEngineIni);
+
+	// Default Lazyploy options
+	GConfig->SetText(TEXT("Lazyploy.PostStage"), TEXT("LazyployUrl"), BuildManagerUrlTextBox->GetText(), GEngineIni);
+	GConfig->SetText(TEXT("Lazyploy.PostStage"), TEXT("BuildDescription"), BuildDescriptionTextBox->GetText(), GEngineIni);
+
+	GConfig->Flush(false, GEngineIni);
 }
 
 bool SCookAndDeploy::IsCookingEnabled() const
@@ -392,6 +494,8 @@ FReply SCookAndDeploy::StartCook()
 {
 	if (CookProgress.IsValid() && CookProgress->IsReadyForNewJob())
 	{
+		SaveOptionsToConfig();
+
 		CookProgress->ClearTasks();
 
 		FString UATPath = FPaths::ConvertRelativePathToFull(Client->GetEngineBatchFilesPath() / TEXT("RunUAT.bat"));
@@ -473,7 +577,7 @@ FReply SCookAndDeploy::StartCook()
 			protected:
 				virtual bool PerformTask() override
 				{
-					if (FGenericHttpJsonTask::PerformTask())
+					if (FGenericHttpJsonTask::PerformTask() && JsonObj.IsValid())
 					{	
 						if (JsonObj->TryGetNumberField(TEXT("id"), Client->BuildId))
 						{
