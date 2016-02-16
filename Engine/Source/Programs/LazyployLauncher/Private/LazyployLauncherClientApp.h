@@ -1,4 +1,4 @@
-// Copyright 1998-2015 Epic Games, Inc. All Rights Reserved.
+// Copyright 2016 Gamemakin LLC. All Rights Reserved.
 
 #pragma once
 
@@ -14,4 +14,4 @@
 /**
 * Run the crash report client app
 */
-void RunAllarBuilderClient(const TCHAR* Commandline);
+void RunLazyployLauncherClient(const TCHAR* Commandline);

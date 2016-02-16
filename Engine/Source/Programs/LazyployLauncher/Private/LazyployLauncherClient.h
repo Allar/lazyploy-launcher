@@ -1,19 +1,19 @@
-// Copyright 1998-2015 Epic Games, Inc. All Rights Reserved.
+// Copyright 2016 Gamemakin LLC. All Rights Reserved.
 
 #pragma once
 
-#include "AllarBuilderClientApp.h"
+#include "LazyployLauncherClientApp.h"
 
-/** Type definition for shared pointers to instances of FAllarBuilderClient. */
-typedef TSharedPtr<class FAllarBuilderClient> FAllarBuilderClientPtr;
+/** Type definition for shared pointers to instances of FLazyployLauncherClient. */
+typedef TSharedPtr<class FLazyployLauncherClient> FLazyployLauncherClientPtr;
 
-/** Type definition for shared references to instances of FAllarBuilderClient. */
-typedef TSharedRef<class FAllarBuilderClient> FAllarBuilderClientRef;
+/** Type definition for shared references to instances of FLazyployLauncherClient. */
+typedef TSharedRef<class FLazyployLauncherClient> FLazyployLauncherClientRef;
 
 /**
 * Main implementation of the Allar Builder client application
 */
-class FAllarBuilderClient : public TSharedFromThis<FAllarBuilderClient>
+class FLazyployLauncherClient : public TSharedFromThis<FLazyployLauncherClient>
 {
 
 public:
@@ -21,10 +21,10 @@ public:
 	* Constructor:
 	*
 	*/
-	FAllarBuilderClient();
+	FLazyployLauncherClient();
 
 	/** Destructor. */
-	virtual ~FAllarBuilderClient();
+	virtual ~FLazyployLauncherClient();
 
 	/**
 	* Handle user closing the main window

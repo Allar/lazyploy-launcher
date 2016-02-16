@@ -1,4 +1,4 @@
-#include "../AllarBuilderClientApp.h"
+#include "../LazyployLauncherClientApp.h"
 #include "ISourceCodeAccessModule.h"
 #include "SClientLauncher.h"
 #include "SCookProgress.h"
@@ -7,7 +7,7 @@
 
 #define LOCTEXT_NAMESPACE "CookAndDeploy"
 
-void SCookAndDeploy::Construct(const FArguments& InArgs, TSharedRef<FAllarBuilderClient> InClient, const TSharedRef<ISlateStyle>& InStyle)
+void SCookAndDeploy::Construct(const FArguments& InArgs, TSharedRef<FLazyployLauncherClient> InClient, const TSharedRef<ISlateStyle>& InStyle)
 {
 	Client = InClient;
 
@@ -137,6 +137,7 @@ void SCookAndDeploy::Construct(const FArguments& InArgs, TSharedRef<FAllarBuilde
 						[
 							SAssignNew(IterateCheckboxOption, SCheckboxOption, InStyle)
 							.LabelText(LOCTEXT("Iterate", "Iterate"))
+							.CheckboxState(ECheckBoxState::Checked)
 							.RightAlignCheckBox(true)
 						]
 						// Strip Version?
@@ -161,6 +162,7 @@ void SCookAndDeploy::Construct(const FArguments& InArgs, TSharedRef<FAllarBuilde
 				.HAlign(HAlign_Left)
 				.BorderImage(FCoreStyle::Get().GetBrush("ToolPanel.GroupBorder"))
 				.Padding(8.0f)
+				.Visibility(EVisibility::Collapsed)
 				[
 					SNew(SBox)
 					.WidthOverride(650)
@@ -238,7 +240,7 @@ void SCookAndDeploy::Construct(const FArguments& InArgs, TSharedRef<FAllarBuilde
 						[
 							SAssignNew(DeployToBuildManagerCheckboxOption, SCheckboxOption, InStyle)
 							.LabelText(LOCTEXT("DeployToBuildManager", "Deploy to Build Manager"))
-							.CheckboxState(ECheckBoxState::Checked)
+							.CheckboxState(ECheckBoxState::Unchecked)
 							.IsEnabled(this, &SCookAndDeploy::IsBuildManagerEnabled)
 						]
 					]
@@ -463,7 +465,7 @@ FReply SCookAndDeploy::StartCook()
 			class FGetNewBuildInfoTask : public FGenericHttpJsonTask
 			{
 			public:
-				FGetNewBuildInfoTask(TSharedPtr<FAllarBuilderClient> InClient, FString JsonBuildInfo)
+				FGetNewBuildInfoTask(TSharedPtr<FLazyployLauncherClient> InClient, FString JsonBuildInfo)
 					: FGenericHttpJsonTask(TEXT("GetBuildInfo"), TEXT("Get Build Info from Build Manager"), InClient->BuildManagerURL / TEXT("api/builds"), TEXT("POST"), JsonBuildInfo)
 					, Client(InClient)
 				{
@@ -485,7 +487,7 @@ FReply SCookAndDeploy::StartCook()
 					return false;
 				}
 			private:
-				TSharedPtr<FAllarBuilderClient> Client;
+				TSharedPtr<FLazyployLauncherClient> Client;
 			};
 
 			TSharedPtr<FJsonObject> JsonObj = MakeShareable(new FJsonObject());

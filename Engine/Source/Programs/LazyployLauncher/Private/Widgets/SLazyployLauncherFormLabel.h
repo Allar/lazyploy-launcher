@@ -1,16 +1,16 @@
-// Copyright 1998-2015 Epic Games, Inc. All Rights Reserved.
+// Copyright 2016 Gamemakin LLC. All Rights Reserved.
 
 #pragma once
 
 /**
 * Implements a widget for form input field labels with optional validation errors.
 */
-class SAllarBuilderFormLabel
+class SLazyployLauncherFormLabel
 	: public SCompoundWidget
 {
 public:
 
-	SLATE_BEGIN_ARGS(SAllarBuilderFormLabel)
+	SLATE_BEGIN_ARGS(SLazyployLauncherFormLabel)
 		: _ErrorToolTipText()
 		, _ErrorVisibility(EVisibility::Hidden)
 		, _LabelText()
@@ -44,7 +44,7 @@ public:
 						.VAlign(VAlign_Center)
 						[
 							SNew(SImage)
-								.Image(FAllarBuilderClientStyle::Get().GetBrush(TEXT("ProjectPicker.ErrorImage")))
+								.Image(FLazyployLauncherClientStyle::Get().GetBrush(TEXT("ProjectPicker.ErrorImage")))
 								.ToolTipText(InArgs._ErrorToolTipText)
 								.Visibility(InArgs._ErrorVisibility)
 						]
@@ -55,7 +55,7 @@ public:
 						[
 							SNew(STextBlock)
 								.Text(InArgs._LabelText)
-								.TextStyle(FAllarBuilderClientStyle::Get(), TEXT("ProjectPicker.Text"))
+								.TextStyle(FLazyployLauncherClientStyle::Get(), TEXT("ProjectPicker.Text"))
 						]
 			];
 	}

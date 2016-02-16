@@ -1,4 +1,4 @@
-#include "../AllarBuilderClientApp.h"
+#include "../LazyployLauncherClientApp.h"
 #include "SCookProgress.h"
 #include "STaskListRow.h"
 #include "../GenericTask.h"
@@ -8,7 +8,7 @@
 
 #define LOCTEXT_NAMESPACE "CookProgress"
 
-void SCookProgress::Construct(const FArguments& InArgs, TSharedRef<FAllarBuilderClient> InClient, const TSharedRef<ISlateStyle>& InStyle)
+void SCookProgress::Construct(const FArguments& InArgs, TSharedRef<FLazyployLauncherClient> InClient, const TSharedRef<ISlateStyle>& InStyle)
 {
 	Client = InClient;
 

@@ -1,4 +1,4 @@
-// Copyright 1998-2015 Epic Games, Inc. All Rights Reserved.
+// Copyright 2016 Gamemakin LLC. All Rights Reserved.
 
 #pragma once
 
@@ -6,7 +6,7 @@
 #include "SlateStyle.h"
 
 /** Slate styles for the crash report client app */
-class FAllarBuilderClientStyle
+class FLazyployLauncherClientStyle
 {
 public:
 	/**

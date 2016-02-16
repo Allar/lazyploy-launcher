@@ -1,11 +1,11 @@
-﻿// Copyright 1998-2015 Epic Games, Inc. All Rights Reserved.
+﻿// Copyright 2016 Gamemakin LLC. All Rights Reserved.
 
 using UnrealBuildTool;
 using System.Collections.Generic;
 
-public class AllarBuilderTarget : TargetRules
+public class LazyployLauncherTarget : TargetRules
 {
-	public AllarBuilderTarget(TargetInfo Target)
+	public LazyployLauncherTarget(TargetInfo Target)
 	{
 		Type = TargetType.Program;
         AdditionalPlugins.Add("UdpMessaging");
@@ -23,7 +23,7 @@ public class AllarBuilderTarget : TargetRules
 	{
 		OutBuildBinaryConfigurations.Add(
 			new UEBuildBinaryConfiguration(	InType: UEBuildBinaryType.Executable,
-											InModuleNames: new List<string>() { "AllarBuilder" } )
+											InModuleNames: new List<string>() { "LazyployLauncher" } )
 			);
 	}
 

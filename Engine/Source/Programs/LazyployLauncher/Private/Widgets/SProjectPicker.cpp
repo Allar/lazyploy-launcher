@@ -1,7 +1,7 @@
-// Copyright 1998-2015 Epic Games, Inc. All Rights Reserved.
+// Copyright 2016 Gamemakin LLC. All Rights Reserved.
 
-#include "../AllarBuilderClientApp.h"
-#include "SAllarBuilderFormLabel.h"
+#include "../LazyployLauncherClientApp.h"
+#include "SLazyployLauncherFormLabel.h"
 #include "SProjectPicker.h"
 
 
@@ -23,7 +23,7 @@ SProjectPicker::~SProjectPicker()
 /* SProjectPicker interface
 *****************************************************************************/
 
-void SProjectPicker::Construct(const FArguments& InArgs, const FAllarBuilderClientRef& InModel)
+void SProjectPicker::Construct(const FArguments& InArgs, const FLazyployLauncherClientRef& InModel)
 {
 	Model = InModel;
 
@@ -69,8 +69,8 @@ TSharedRef<SWidget> SProjectPicker::MakeProjectWidget()
 					.AutoWidth()
 					.Padding(0.0f, 0.0f, 16.0f, 0.0f)
 					[
-						SNew(SAllarBuilderFormLabel)
-							.ErrorToolTipText(NSLOCTEXT("AllarBuilderBuildValidation", "NoProjectSelectedError", "A Project must be selected."))
+						SNew(SLazyployLauncherFormLabel)
+							.ErrorToolTipText(NSLOCTEXT("LazyployLauncherBuildValidation", "NoProjectSelectedError", "A Project must be selected."))
 							.ErrorVisibility(this, &SProjectPicker::HandleValidationErrorIconVisibility)
 							.LabelText(LOCTEXT("ProjectComboBoxLabel", "Project:"))
 					]
@@ -84,7 +84,7 @@ TSharedRef<SWidget> SProjectPicker::MakeProjectWidget()
 							[
 								SNew(STextBlock)
 									.Text(this, &SProjectPicker::HandleProjectComboButtonText)
-									.TextStyle(FAllarBuilderClientStyle::Get(), TEXT("ProjectPicker.Text"))
+									.TextStyle(FLazyployLauncherClientStyle::Get(), TEXT("ProjectPicker.Text"))
 							]
 							.ContentPadding(FMargin(4.0f, 2.0f))
 							.MenuContent()

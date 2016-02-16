@@ -1,11 +1,11 @@
-// Copyright 1998-2015 Epic Games, Inc. All Rights Reserved.
+// Copyright 2016 Gamemakin LLC. All Rights Reserved.
 
 #pragma once
 
-#include "AllarBuilderClient.h"
+#include "LazyployLauncherClient.h"
 
-#include "SAllarBuilderClient.h"
-#include "AllarBuilderClientStyle.h"
+#include "SLazyployLauncherClient.h"
+#include "LazyployLauncherClientStyle.h"
 #include "SlateStyle.h"
 #include "SThrobber.h"
 #include "SNumericEntryBox.h"
@@ -14,20 +14,20 @@
 #include "Widgets/SClientLauncher.h"
 #include "Widgets/SCookAndDeploy.h"
 
-#define LOCTEXT_NAMESPACE "AllarBuilderClient"
+#define LOCTEXT_NAMESPACE "LazyployLauncherClient"
 
 #if !CRASH_REPORT_UNATTENDED_ONLY
 
 /**
 * UI for the crash report client app
 */
-class SAllarBuilderClient : public SCompoundWidget
+class SLazyployLauncherClient : public SCompoundWidget
 {
 public:
 	/**
 	* Slate arguments
 	*/
-	SLATE_BEGIN_ARGS(SAllarBuilderClient)
+	SLATE_BEGIN_ARGS(SLazyployLauncherClient)
 	{
 	}
 
@@ -38,9 +38,9 @@ public:
 	* @param InArgs Slate arguments, not used
 	* @param Client Allar Builder client implementation object
 	*/
-	void Construct(const FArguments& InArgs, TSharedRef<FAllarBuilderClient> Client, const TSharedRef<ISlateStyle>& InStyle)
+	void Construct(const FArguments& InArgs, TSharedRef<FLazyployLauncherClient> Client, const TSharedRef<ISlateStyle>& InStyle)
 	{
-		AllarBuilderClient = Client;
+		LazyployLauncherClient = Client;
 
 		ChildSlot
 		[
@@ -73,8 +73,8 @@ public:
 						[
 							SNew(SButton)
 							.VAlign(VAlign_Center)
-							.IsEnabled(Client, &FAllarBuilderClient::IsProjectSelected)
-							.OnClicked(Client, &FAllarBuilderClient::LaunchEditor)
+							.IsEnabled(Client, &FLazyployLauncherClient::IsProjectSelected)
+							.OnClicked(Client, &FLazyployLauncherClient::LaunchEditor)
 							.Content()
 							[
 								SNew(STextBlock)
@@ -93,7 +93,7 @@ public:
 					.AutoHeight()
 					[
 						SNew(SVerticalBox)
-						.IsEnabled(Client, &FAllarBuilderClient::IsProjectSelected)
+						.IsEnabled(Client, &FLazyployLauncherClient::IsProjectSelected)
 						// Clients
 						+ SVerticalBox::Slot()
 						.AutoHeight()
@@ -129,7 +129,7 @@ public:
 private:
 
 	/** Crash report client implementation object */
-	TSharedPtr<FAllarBuilderClient> AllarBuilderClient;
+	TSharedPtr<FLazyployLauncherClient> LazyployLauncherClient;
 };
 
 #endif // !CRASH_REPORT_UNATTENDED_ONLY

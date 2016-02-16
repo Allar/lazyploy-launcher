@@ -1,10 +1,19 @@
-# ue4-dev-launcher
+# lazyploy-launcher
 
-Put `AllarBuilder` in your Engine's Engine\Source\Programs, regenerate your Engine's project files, then build it.
+## Installation
 
-Should work. Developed using 4.10.
+### With UE4 Built From Source Code
 
-`AllarBuilder` is an old name and at some point I will refactor and clean up everything here.
+1. Clone this repo and then copy the contents of the Engine folder into your UE4's Engine folder.
+1. Regenerate Engine project files.
+1. Build `LazyployLauncher` with the `Development` configuration.
+1. Run `Engine\Binaries\Win64\LazyployLauncher.exe`.
+
+### With Binary/Launcher Version of UE4
+
+    @TODO
+
+Developed on 4.10.
 
 I offer no support currently.
 

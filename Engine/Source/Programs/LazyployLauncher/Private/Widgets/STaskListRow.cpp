@@ -1,6 +1,6 @@
-// Copyright 1998-2015 Epic Games, Inc. All Rights Reserved.
+// Copyright 2016 Gamemakin LLC. All Rights Reserved.
 
-#include "../AllarBuilderClientApp.h"
+#include "../LazyployLauncherClientApp.h"
 #include "STaskListRow.h"
 #include "SThrobber.h"
 

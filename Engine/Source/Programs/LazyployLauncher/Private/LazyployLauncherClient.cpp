@@ -1,5 +1,5 @@
-#include "AllarBuilderClientApp.h"
-#include "AllarBuilderClient.h"
+#include "LazyployLauncherClientApp.h"
+#include "LazyployLauncherClient.h"
 #include "UniquePtr.h"
 
 #include "TaskGraphInterfaces.h"
@@ -7,7 +7,7 @@
 static FString _BuildUploadEndpoint = TEXT("");
 static FString _BuildManagerURL = TEXT("http://localhost/");
 
-FAllarBuilderClient::FAllarBuilderClient()
+FLazyployLauncherClient::FLazyployLauncherClient()
 	: BuildUploadEndpoint(_BuildUploadEndpoint)
 	, BuildManagerURL(_BuildManagerURL)
 	, bUpdateBuildStatus(false)
@@ -15,15 +15,15 @@ FAllarBuilderClient::FAllarBuilderClient()
 }
 
 
-FAllarBuilderClient::~FAllarBuilderClient()
+FLazyployLauncherClient::~FLazyployLauncherClient()
 {
 }
 
-void FAllarBuilderClient::RequestCloseWindow(const TSharedRef<SWindow>& Window)
+void FLazyployLauncherClient::RequestCloseWindow(const TSharedRef<SWindow>& Window)
 {
 }
 
-FString FAllarBuilderClient::GetEditorBinaryPath() const
+FString FLazyployLauncherClient::GetEditorBinaryPath() const
 {
 #if PLATFORM_WINDOWS
 #if PLATFORM_64BITS
@@ -35,22 +35,22 @@ FString FAllarBuilderClient::GetEditorBinaryPath() const
 	return FString("Not implemented for this platform.");
 }
 
-FString FAllarBuilderClient::GetEngineBatchFilesPath() const
+FString FLazyployLauncherClient::GetEngineBatchFilesPath() const
 {
 	return FPaths::EngineDir() / TEXT("Build/BatchFiles");
 }
 
-FString FAllarBuilderClient::GetProjectPath() const
+FString FLazyployLauncherClient::GetProjectPath() const
 {
 	return ProjectPath;
 }
 
-void FAllarBuilderClient::SetProjectPath(const FString NewProjectPath)
+void FLazyployLauncherClient::SetProjectPath(const FString NewProjectPath)
 {
 	ProjectPath = NewProjectPath;
 }
 
-FString FAllarBuilderClient::GetProjectDir() const
+FString FLazyployLauncherClient::GetProjectDir() const
 {
 	if (!ProjectPath.IsEmpty())
 	{
@@ -59,7 +59,7 @@ FString FAllarBuilderClient::GetProjectDir() const
 	return FString();
 }
 
-FString FAllarBuilderClient::GetProjectName() const
+FString FLazyployLauncherClient::GetProjectName() const
 {
 	if (!ProjectPath.IsEmpty())
 	{
@@ -68,22 +68,22 @@ FString FAllarBuilderClient::GetProjectName() const
 	return FString();
 }
 
-void FAllarBuilderClient::SetBuildUploadEndpoint(FString NewEndpoint)
+void FLazyployLauncherClient::SetBuildUploadEndpoint(FString NewEndpoint)
 {
 	_BuildUploadEndpoint = NewEndpoint;
 }
 
-void FAllarBuilderClient::SetBuildManagerURL(FString NewURL)
+void FLazyployLauncherClient::SetBuildManagerURL(FString NewURL)
 {
 	_BuildManagerURL = NewURL;
 }
 
-bool FAllarBuilderClient::IsProjectSelected() const
+bool FLazyployLauncherClient::IsProjectSelected() const
 {
 	return !ProjectPath.IsEmpty();
 }
 
-FReply FAllarBuilderClient::LaunchEditor()
+FReply FLazyployLauncherClient::LaunchEditor()
 {
 	uint32 ProcessID;
 	FString Args = GetProjectPath() + TEXT(" -SessionFilter=Lazyploy");

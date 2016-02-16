@@ -1,11 +1,11 @@
-// Copyright 1998-2015 Epic Games, Inc. All Rights Reserved.
+// Copyright 2016 Gamemakin LLC. All Rights Reserved.
 
-#include "AllarBuilderClientApp.h"
-#include "AllarBuilderClientStyle.h"
+#include "LazyployLauncherClientApp.h"
+#include "LazyployLauncherClientStyle.h"
 
-TSharedPtr< FSlateStyleSet > FAllarBuilderClientStyle::StyleSet = nullptr;
+TSharedPtr< FSlateStyleSet > FLazyployLauncherClientStyle::StyleSet = nullptr;
 
-void FAllarBuilderClientStyle::Initialize()
+void FLazyployLauncherClientStyle::Initialize()
 {
 	if (!StyleSet.IsValid())
 	{
@@ -14,7 +14,7 @@ void FAllarBuilderClientStyle::Initialize()
 	}
 }
 
-void FAllarBuilderClientStyle::Shutdown()
+void FLazyployLauncherClientStyle::Shutdown()
 {
 	FSlateStyleRegistry::UnRegisterSlateStyle(*StyleSet);
 	StyleSet.Reset();
@@ -34,14 +34,14 @@ namespace
 	}
 }
 
-TSharedRef< FSlateStyleSet > FAllarBuilderClientStyle::Create()
+TSharedRef< FSlateStyleSet > FLazyployLauncherClientStyle::Create()
 {
 	const FVector2D Icon16x16(16.0f, 16.0f);
 	const FVector2D Icon32x32(32.0f, 32.0f);
 	const FVector2D Icon48x48(48.0f, 48.0f);
 	const FVector2D Icon64x64(64.0f, 64.0f);
 
-	TSharedRef<FSlateStyleSet> StyleRef = MakeShareable(new FSlateStyleSet("FAllarBuilderClientStyle"));
+	TSharedRef<FSlateStyleSet> StyleRef = MakeShareable(new FSlateStyleSet("FLazyployLauncherClientStyle"));
 	FSlateStyleSet& Style = StyleRef.Get();
 
 	const FTextBlockStyle DefaultText = FTextBlockStyle()
@@ -107,13 +107,13 @@ TSharedRef< FSlateStyleSet > FAllarBuilderClientStyle::Create()
 	}
 
 	// RichText
-	const FTextBlockStyle AllarBuilderDataStyle = FTextBlockStyle()
+	const FTextBlockStyle LazyployLauncherDataStyle = FTextBlockStyle()
 		.SetFont(TTF_FONT("Testing/Fonts/Roboto-Italic", 9))
 		.SetColorAndOpacity(FSlateColor(FLinearColor::White * 0.5f))
 		.SetShadowOffset(FVector2D::ZeroVector)
 		.SetShadowColorAndOpacity(FLinearColor::Black);
 
-	Style.Set("AllarBuilderDataStyle", AllarBuilderDataStyle);
+	Style.Set("LazyployLauncherDataStyle", LazyployLauncherDataStyle);
 
 	FButtonStyle DarkHyperlinkButton = FButtonStyle()
 		.SetNormal(BORDER_BRUSH("Old/HyperlinkDotted", FMargin(0, 0, 0, 3 / 16.0f), FSlateColor(FLinearColor::White * 0.5f)))
@@ -122,7 +122,7 @@ TSharedRef< FSlateStyleSet > FAllarBuilderClientStyle::Create()
 
 	const FHyperlinkStyle DarkHyperlink = FHyperlinkStyle()
 		.SetUnderlineStyle(DarkHyperlinkButton)
-		.SetTextStyle(AllarBuilderDataStyle)
+		.SetTextStyle(LazyployLauncherDataStyle)
 		.SetPadding(FMargin(0.0f));
 
 	Style.Set("RichText.Hyperlink", DarkHyperlink);
@@ -132,12 +132,12 @@ TSharedRef< FSlateStyleSet > FAllarBuilderClientStyle::Create()
 
 #undef TTF_FONT
 
-const ISlateStyle& FAllarBuilderClientStyle::Get()
+const ISlateStyle& FLazyployLauncherClientStyle::Get()
 {
 	return *StyleSet;
 }
 
-const TSharedPtr<FSlateStyleSet> FAllarBuilderClientStyle::GetPtr()
+const TSharedPtr<FSlateStyleSet> FLazyployLauncherClientStyle::GetPtr()
 {
 	return StyleSet;
 }

@@ -1,4 +1,4 @@
-// Copyright 1998-2015 Epic Games, Inc. All Rights Reserved.
+// Copyright 2016 Gamemakin LLC. All Rights Reserved.
 
 #pragma once
 #include "../GenericTask.h"
@@ -22,7 +22,7 @@ public:
 	*
 	* @param InArgs The Slate argument list.
 	*/
-	void Construct(const FArguments& InArgs, TSharedRef<FAllarBuilderClient> InClient, const TSharedRef<ISlateStyle>& InStyle);
+	void Construct(const FArguments& InArgs, TSharedRef<FLazyployLauncherClient> InClient, const TSharedRef<ISlateStyle>& InStyle);
 
 	FText HandleProgressTextBlockText() const;
 	// Callback for getting the filled percentage of the progress bar.
@@ -66,7 +66,7 @@ protected:
 
 private:
 
-	TSharedPtr<FAllarBuilderClient> Client;
+	TSharedPtr<FLazyployLauncherClient> Client;
 
 	// Holds the task list.
 	TArray<FGenericTaskPtr> TaskList;

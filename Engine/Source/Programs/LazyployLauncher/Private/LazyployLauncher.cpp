@@ -1,12 +1,12 @@
-// Copyright 1998-2015 Epic Games, Inc. All Rights Reserved.
+// Copyright 2016 Gamemakin LLC. All Rights Reserved.
 
 
-#include "AllarBuilderClientApp.h"
-#include "AllarBuilder.h"
+#include "LazyployLauncherClientApp.h"
+#include "LazyployLauncher.h"
 
-#include "AllarBuilderClient.h"
-#include "Widgets/SAllarBuilderClient.h"
-#include "AllarBuilderClientStyle.h"
+#include "LazyployLauncherClient.h"
+#include "Widgets/SLazyployLauncherClient.h"
+#include "LazyployLauncherClientStyle.h"
 #include "SDockTab.h"
 
 #include "RequiredProgramMainCPPInclude.h"
@@ -14,9 +14,9 @@
 #include "AutomationController.h"
 #include "ISourceCodeAccessModule.h"
 
-DEFINE_LOG_CATEGORY_STATIC(LogAllarBuilder, Log, All);
+DEFINE_LOG_CATEGORY_STATIC(LogLazyployLauncher, Log, All);
 
-IMPLEMENT_APPLICATION(AllarBuilder, "AllarBuilder");
+IMPLEMENT_APPLICATION(LazyployLauncher, "LazyployLauncher");
 
 #define IDEAL_FRAMERATE 60;
 
@@ -25,7 +25,7 @@ namespace LazyployLauncher
 	TSharedPtr<FTabManager::FLayout> ApplicationLayout;
 }
 
-TSharedPtr<FAllarBuilderClient> AllarBuilderClient = nullptr;
+TSharedPtr<FLazyployLauncherClient> LazyployLauncherClient = nullptr;
 TSharedPtr<FSlateStyleSet> Style = nullptr;
 
 TSharedRef<SDockTab> SpawnLazyployLauncherTab(const FSpawnTabArgs& SpawnTabArgs)
@@ -33,12 +33,12 @@ TSharedRef<SDockTab> SpawnLazyployLauncherTab(const FSpawnTabArgs& SpawnTabArgs)
 	const TSharedRef<SDockTab> DockTab = SNew(SDockTab)
 		.TabRole(ETabRole::MajorTab);
 
-	DockTab->SetContent(SNew(SAllarBuilderClient, AllarBuilderClient.ToSharedRef(), Style.ToSharedRef()));
+	DockTab->SetContent(SNew(SLazyployLauncherClient, LazyployLauncherClient.ToSharedRef(), Style.ToSharedRef()));
 
 	return DockTab;
 }
 
-void RunAllarBuilderClient(const TCHAR* CommandLine)
+void RunLazyployLauncherClient(const TCHAR* CommandLine)
 {
 	FString NewCommandLine = CommandLine;
 
@@ -70,11 +70,11 @@ void RunAllarBuilderClient(const TCHAR* CommandLine)
 	FGlobalTabmanager::Get()->SetApplicationTitle(NSLOCTEXT("LazyployLauncher", "AppTitle", "Lazyploy Launcher"));
 
 	// Prepare the custom Slate styles
-	FAllarBuilderClientStyle::Initialize();
+	FLazyployLauncherClientStyle::Initialize();
 
 	// Create the main implementation object
-	AllarBuilderClient = MakeShareable(new FAllarBuilderClient());
-	Style = FAllarBuilderClientStyle::GetPtr().ToSharedRef();
+	LazyployLauncherClient = MakeShareable(new FLazyployLauncherClient());
+	Style = FLazyployLauncherClientStyle::GetPtr().ToSharedRef();
 
 	// Register tab
 	auto& TabSpawnerEntry = FGlobalTabmanager::Get()->RegisterNomadTabSpawner(FName("LazyployLauncher"), FOnSpawnTab::CreateStatic(&SpawnLazyployLauncherTab))
@@ -124,7 +124,7 @@ void RunAllarBuilderClient(const TCHAR* CommandLine)
 
 
 	// Clean up the custom styles
-	FAllarBuilderClientStyle::Shutdown();
+	FLazyployLauncherClientStyle::Shutdown();
 
 	// save application layout
 	FLayoutSaveRestore::SaveToConfig(LazyployFrontendLayoutIni, LazyployLauncher::ApplicationLayout.ToSharedRef());

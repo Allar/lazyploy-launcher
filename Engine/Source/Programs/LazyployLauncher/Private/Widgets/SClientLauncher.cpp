@@ -1,10 +1,10 @@
-#include "../AllarBuilderClientApp.h"
+#include "../LazyployLauncherClientApp.h"
 #include "SCheckboxOption.h"
 #include "SClientLauncher.h"
 
 #define LOCTEXT_NAMESPACE "ClientLauncher"
 
-void SClientLauncher::Construct(const FArguments& InArgs, TSharedRef<FAllarBuilderClient> InClient, const TSharedRef<ISlateStyle>& InStyle)
+void SClientLauncher::Construct(const FArguments& InArgs, TSharedRef<FLazyployLauncherClient> InClient, const TSharedRef<ISlateStyle>& InStyle)
 {
 	Client = InClient;
 
@@ -227,7 +227,7 @@ FReply SClientLauncher::LaunchClients()
 
 		NewClientArgs = FString::Printf(TEXT("%s %s -game %s"), *Client->GetProjectPath(), *NewClientArgs, *ResAndPosArgs);
 
-		UE_LOG(LogAllarBuilder, Log, TEXT("Launching client with arguments: %s"), *NewClientArgs);
+		UE_LOG(LogLazyployLauncher, Log, TEXT("Launching client with arguments: %s"), *NewClientArgs);
 
 		FPlatformProcess::CreateProc(*EditorBinaryPath, *NewClientArgs, true, false, false, &ProcessID, 0, nullptr, nullptr);
 	}

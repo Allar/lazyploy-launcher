@@ -1,10 +1,10 @@
-﻿// Copyright 1998-2015 Epic Games, Inc. All Rights Reserved.
+﻿// Copyright 2016 Gamemakin LLC. All Rights Reserved.
 
 using UnrealBuildTool;
 
-public class AllarBuilder : ModuleRules
+public class LazyployLauncher : ModuleRules
 {
-	public AllarBuilder(TargetInfo Target)
+	public LazyployLauncher(TargetInfo Target)
 	{
 		PublicIncludePaths.Add("Runtime/Launch/Public");
 

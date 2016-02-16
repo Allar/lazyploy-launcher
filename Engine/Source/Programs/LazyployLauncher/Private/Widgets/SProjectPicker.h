@@ -1,4 +1,4 @@
-// Copyright 1998-2015 Epic Games, Inc. All Rights Reserved.
+// Copyright 2016 Gamemakin LLC. All Rights Reserved.
 
 #pragma once
 
@@ -28,7 +28,7 @@ public:
 	* @param InArgs The Slate argument list.
 	* @param InModel The data model.
 	*/
-	void Construct(const FArguments& InArgs, const FAllarBuilderClientRef& InModel);
+	void Construct(const FArguments& InArgs, const FLazyployLauncherClientRef& InModel);
 
 protected:
 
@@ -69,6 +69,6 @@ private:
 	TArray<TSharedPtr<FString>> ProjectList;
 
 	// Holds a pointer to the data model.
-	FAllarBuilderClientPtr Model;
+	FLazyployLauncherClientPtr Model;
 
 };
