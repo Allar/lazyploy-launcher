@@ -47,6 +47,11 @@ void RunLazyployLauncherClient(const TCHAR* CommandLine)
 		NewCommandLine += TEXT(" -Messaging");
 	}
 
+	if (!FParse::Param(*NewCommandLine, TEXT("-http")))
+	{
+		NewCommandLine += TEXT(" -http=wininet");
+	}
+
 	GEngineLoop.PreInit(*NewCommandLine);
 	FModuleManager::Get().StartProcessingNewlyLoadedObjects();
 
