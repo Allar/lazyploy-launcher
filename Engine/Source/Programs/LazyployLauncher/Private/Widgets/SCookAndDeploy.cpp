@@ -565,7 +565,7 @@ FReply SCookAndDeploy::StartCook()
 		if (OutProjectCodeFilenames.Num() > 0)
 		{
 			bCodeProject = true;
-			CookArgs += TEXT(" -build");
+			//CookArgs += TEXT(" -build");
 		}	
 
 		// Strip versions from content?
@@ -701,12 +701,12 @@ FReply SCookAndDeploy::StartCook()
 					if (bCodeProject)
 					{
 						const FString ProjectBinaryDir = BuildDir / Client->GetProjectName() / TEXT("Binaries/Win64");
-						CookProgress->AddTask(MakeShareable(new FRefreshWindowsProjectCPPBinaries(ProjectBinaryDir, Client->GetProjectDir(), Client->GetProjectName(), TEXT("Win64"))));
+						CookProgress->AddTask(MakeShareable(new FRefresCPPBinariesTask(ProjectBinaryDir, Client->GetProjectDir(), Client->GetProjectName(), TEXT("Win64"))));
 					}
 					else
 					{
 						const FString ProjectBinaryDir = BuildDir / TEXT("Engine") / TEXT("Binaries/Win64");
-						CookProgress->AddTask(MakeShareable(new FRefreshWindowsBPBinaries(ProjectBinaryDir)));
+						CookProgress->AddTask(MakeShareable(new FRefreshBPBinariesTask(ProjectBinaryDir)));
 					}
 				}
 				
@@ -739,12 +739,12 @@ FReply SCookAndDeploy::StartCook()
 					if (bCodeProject)
 					{
 						const FString ProjectBinaryDir = BuildDir / Client->GetProjectName() / TEXT("Binaries/Win64");
-						CookProgress->AddTask(MakeShareable(new FRefreshWindowsProjectCPPBinaries(ProjectBinaryDir, Client->GetProjectDir(), Client->GetProjectName(), TEXT("Win64"), true)));
+						CookProgress->AddTask(MakeShareable(new FRefresCPPBinariesTask(ProjectBinaryDir, Client->GetProjectDir(), Client->GetProjectName(), TEXT("Win64"), true)));
 					}
 					else
 					{
 						const FString ProjectBinaryDir = BuildDir / TEXT("Engine") / TEXT("Binaries/Win64");
-						CookProgress->AddTask(MakeShareable(new FRefreshWindowsBPBinaries(ProjectBinaryDir, true)));
+						CookProgress->AddTask(MakeShareable(new FRefreshBPBinariesTask(ProjectBinaryDir, true)));
 					}
 				}
 
@@ -787,7 +787,10 @@ FReply SCookAndDeploy::StartCook()
 				TaskDesc += ("Linux Server");
 			}
 
-			CookProgress->NewTask(TEXT("LinuxCook"), TEXT("Cooking ") + TaskDesc, UATPath, CookArgs + PlatformString, Client->GetEngineBatchFilesPath());
+			if (!bRefreshBinariesOnly)
+			{
+				CookProgress->NewTask(TEXT("LinuxCook"), TEXT("Cooking ") + TaskDesc, UATPath, CookArgs + PlatformString, Client->GetEngineBatchFilesPath());
+			}
 		
 			// Set up Post Cook Tasks
 			FString StagedBuildDir = Client->GetProjectDir() / TEXT("Saved/StagedBuilds");
@@ -796,6 +799,20 @@ FReply SCookAndDeploy::StartCook()
 			{
 				const FString PlatformDir = TEXT("LinuxNoEditor");
 				const FString BuildDir = StagedBuildDir / PlatformDir;
+
+				if (bRefreshBinariesOnly)
+				{
+					if (bCodeProject)
+					{
+						const FString ProjectBinaryDir = BuildDir / Client->GetProjectName() / TEXT("Binaries/Linux");
+						CookProgress->AddTask(MakeShareable(new FRefresCPPBinariesTask(ProjectBinaryDir, Client->GetProjectDir(), Client->GetProjectName(), TEXT("Linux"))));
+					}
+					else
+					{
+						const FString ProjectBinaryDir = BuildDir / Client->GetProjectName() / TEXT("Binaries/Linux");
+						CookProgress->AddTask(MakeShareable(new FRefreshBPBinariesTask(ProjectBinaryDir)));
+					}
+				}
 
 				if (bStripDebug)
 				{
@@ -819,6 +836,20 @@ FReply SCookAndDeploy::StartCook()
 			{
 				const FString PlatformDir = TEXT("LinuxServer");
 				const FString BuildDir = StagedBuildDir / PlatformDir;
+
+				if (bRefreshBinariesOnly)
+				{
+					if (bCodeProject)
+					{
+						const FString ProjectBinaryDir = BuildDir / Client->GetProjectName() / TEXT("Binaries/Linux");
+						CookProgress->AddTask(MakeShareable(new FRefresCPPBinariesTask(ProjectBinaryDir, Client->GetProjectDir(), Client->GetProjectName(), TEXT("Linux"), true)));
+					}
+					else
+					{
+						const FString ProjectBinaryDir = BuildDir / Client->GetProjectName() / TEXT("Binaries/Linux");
+						CookProgress->AddTask(MakeShareable(new FRefreshBPBinariesTask(ProjectBinaryDir, true)));
+					}
+				}
 
 				if (bStripDebug)
 				{
