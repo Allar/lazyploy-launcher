@@ -47,6 +47,9 @@ private:
 	TSharedPtr<SCheckboxOption> IterateCheckboxOption;
 	TSharedPtr<SCheckboxOption> StripVersionCheckboxOption;
 
+	// More Cook Options
+	TSharedPtr<SCheckboxOption> RefreshBinariesOnlyCheckboxOption;
+
 	// Post Cook Options
 	TSharedPtr<SCheckboxOption> WinServerSteamFixCheckboxOption;
 	TSharedPtr<SCheckboxOption> LinuxServerSteamFixCheckboxOption;

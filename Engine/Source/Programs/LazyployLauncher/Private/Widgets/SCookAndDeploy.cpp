@@ -4,6 +4,7 @@
 #include "SCookProgress.h"
 #include "SCookAndDeploy.h"
 #include "../GenericHttpJsonTask.h"
+#include "../GenericTaskCollection.h"
 
 #define LOCTEXT_NAMESPACE "CookAndDeploy"
 
@@ -149,6 +150,38 @@ void SCookAndDeploy::Construct(const FArguments& InArgs, TSharedRef<FLazyployLau
 							.LabelText(LOCTEXT("StripVersion", "StripVersion"))
 							.CheckboxState(ECheckBoxState::Checked)
 							.RightAlignCheckBox(true)
+						]
+					]
+				]
+			]
+			// More cook options
+			+ SVerticalBox::Slot()
+			.AutoHeight()
+			.Padding(0.0f, 8.0f, 0.0f, 0.0f)
+			[
+				SNew(SBorder)
+				.HAlign(HAlign_Left)
+				.BorderImage(FCoreStyle::Get().GetBrush("ToolPanel.GroupBorder"))
+				.Padding(8.0f)
+				[
+					SNew(SBox)
+					.WidthOverride(650)
+					[
+						SNew(SGridPanel)
+						.FillColumn(0, 1)
+						.FillColumn(1, 1)
+						.FillColumn(2, 1)
+						.FillColumn(3, 1)
+						.FillColumn(4, 1)
+						// Refresh Binaries Only
+						+ SGridPanel::Slot(0, 0)
+						.VAlign(VAlign_Center)
+						.HAlign(HAlign_Left)
+						.ColumnSpan(2)
+						[
+							SAssignNew(RefreshBinariesOnlyCheckboxOption, SCheckboxOption, InStyle)
+							.LabelText(LOCTEXT("RefreshBinariesOnly", "Refresh Binaries Only"))
+							.CheckboxState(ECheckBoxState::Unchecked)
 						]
 					]
 				]
@@ -368,6 +401,9 @@ void SCookAndDeploy::Construct(const FArguments& InArgs, TSharedRef<FLazyployLau
 // @TODO: Make a data storage class
 void SCookAndDeploy::LoadOptionsFromConfig()
 {
+	// @HACK: SetIsChecked would not take a bool. Is there a better way?
+#define BOOL_TO_CHECKED(inBool) inBool ? ECheckBoxState::Checked : ECheckBoxState::Unchecked
+
 	// Default Cook Options
 	bool bWindowsEnabled = false;
 	bool bWindowsServerEnabled = false;
@@ -383,13 +419,10 @@ void SCookAndDeploy::LoadOptionsFromConfig()
 	GConfig->GetBool(TEXT("Lazyploy.Platforms"), TEXT("bWindowsServer"), bWindowsServerEnabled, GEngineIni);
 	GConfig->GetBool(TEXT("Lazyploy.Platforms"), TEXT("bLinux"), bLinuxEnabled, GEngineIni);
 	GConfig->GetBool(TEXT("Lazyploy.Platforms"), TEXT("bLinuxServer"), bLinuxServerEnabled, GEngineIni);
-	GConfig->GetBool(TEXT("Lazyploy.Platforms"), TEXT("bPak"), bPakEnabled, GEngineIni);
-	GConfig->GetBool(TEXT("Lazyploy.Platforms"), TEXT("bCompress"), bCompressEnabled, GEngineIni);
-	GConfig->GetBool(TEXT("Lazyploy.Platforms"), TEXT("bIterate"), bIterateEnabled, GEngineIni);
-	GConfig->GetBool(TEXT("Lazyploy.Platforms"), TEXT("bStripVersion"), bStripVersionEnabled, GEngineIni);
-
-// @HACK: SetIsChecked would not take a bool. Is there a better way?
-#define BOOL_TO_CHECKED(inBool) inBool ? ECheckBoxState::Checked : ECheckBoxState::Unchecked
+	GConfig->GetBool(TEXT("Lazyploy.Options"), TEXT("bPak"), bPakEnabled, GEngineIni);
+	GConfig->GetBool(TEXT("Lazyploy.Options"), TEXT("bCompress"), bCompressEnabled, GEngineIni);
+	GConfig->GetBool(TEXT("Lazyploy.Options"), TEXT("bIterate"), bIterateEnabled, GEngineIni);
+	GConfig->GetBool(TEXT("Lazyploy.Options"), TEXT("bStripVersion"), bStripVersionEnabled, GEngineIni);
 
 	WindowsCheckboxOption->CheckBox->SetIsChecked(BOOL_TO_CHECKED(bWindowsEnabled));
 	WindowsServerCheckboxOption->CheckBox->SetIsChecked(BOOL_TO_CHECKED(bWindowsServerEnabled));
@@ -399,6 +432,14 @@ void SCookAndDeploy::LoadOptionsFromConfig()
 	CompressCheckboxOption->CheckBox->SetIsChecked(BOOL_TO_CHECKED(bCompressEnabled));
 	IterateCheckboxOption->CheckBox->SetIsChecked(BOOL_TO_CHECKED(bIterateEnabled));
 	StripVersionCheckboxOption->CheckBox->SetIsChecked(BOOL_TO_CHECKED(bStripVersionEnabled));
+
+	// Default More Cook Options
+	bool bRefreshBinariesOnly = false;
+
+	// Load More Cook Options
+	GConfig->GetBool(TEXT("Lazyploy.Options"), TEXT("bRefreshBinariesOnly"), bStripVersionEnabled, GEngineIni);
+
+	RefreshBinariesOnlyCheckboxOption->CheckBox->SetIsChecked(BOOL_TO_CHECKED(bRefreshBinariesOnly));
 
 	// Default Steam Fix Options
 	bool bSteamFixWinServerEnabled = false;
@@ -443,10 +484,13 @@ void SCookAndDeploy::SaveOptionsToConfig()
 	GConfig->SetBool(TEXT("Lazyploy.Platforms"), TEXT("bWindowsServer"), WindowsServerCheckboxOption->CheckBox->IsChecked(), GEngineIni);
 	GConfig->SetBool(TEXT("Lazyploy.Platforms"), TEXT("bLinux"), LinuxCheckboxOption->CheckBox->IsChecked(), GEngineIni);
 	GConfig->SetBool(TEXT("Lazyploy.Platforms"), TEXT("bLinuxServer"), LinuxServerCheckboxOption->CheckBox->IsChecked(), GEngineIni);
-	GConfig->SetBool(TEXT("Lazyploy.Platforms"), TEXT("bPak"), PakCheckboxOption->CheckBox->IsChecked(), GEngineIni);
-	GConfig->SetBool(TEXT("Lazyploy.Platforms"), TEXT("bCompress"), CompressCheckboxOption->CheckBox->IsChecked(), GEngineIni);
-	GConfig->SetBool(TEXT("Lazyploy.Platforms"), TEXT("bIterate"), IterateCheckboxOption->CheckBox->IsChecked(), GEngineIni);
-	GConfig->SetBool(TEXT("Lazyploy.Platforms"), TEXT("bStripVersion"), StripVersionCheckboxOption->CheckBox->IsChecked(), GEngineIni);
+	GConfig->SetBool(TEXT("Lazyploy.Options"), TEXT("bPak"), PakCheckboxOption->CheckBox->IsChecked(), GEngineIni);
+	GConfig->SetBool(TEXT("Lazyploy.Options"), TEXT("bCompress"), CompressCheckboxOption->CheckBox->IsChecked(), GEngineIni);
+	GConfig->SetBool(TEXT("Lazyploy.Options"), TEXT("bIterate"), IterateCheckboxOption->CheckBox->IsChecked(), GEngineIni);
+	GConfig->SetBool(TEXT("Lazyploy.Options"), TEXT("bStripVersion"), StripVersionCheckboxOption->CheckBox->IsChecked(), GEngineIni);
+
+	// Save More Cook Options
+	GConfig->SetBool(TEXT("Lazyploy.Options"), TEXT("bRefreshBinariesOnly"), RefreshBinariesOnlyCheckboxOption->CheckBox->IsChecked(), GEngineIni);
 
 	// Default Steam Fix Options
 	GConfig->SetBool(TEXT("Lazyploy.SteamFix"), TEXT("bWindows"), WinServerSteamFixCheckboxOption->CheckBox->IsChecked(), GEngineIni);
@@ -511,14 +555,16 @@ FReply SCookAndDeploy::StartCook()
 			CookArgs += TEXT(" -rocket -nocompile");
 		}
 
+		bool bCodeProject = false;
+
 		// See if project has code that needs to be built
 		FString ProjectPath = FPaths::GetPath(Client->GetProjectPath());
 		TArray<FString> OutProjectCodeFilenames;
 		IFileManager::Get().FindFilesRecursive(OutProjectCodeFilenames, *(ProjectPath / TEXT("Source")), TEXT("*.h"), true, false, false);
 		IFileManager::Get().FindFilesRecursive(OutProjectCodeFilenames, *(ProjectPath / TEXT("Source")), TEXT("*.cpp"), true, false, false);
-		ISourceCodeAccessModule& SourceCodeAccessModule = FModuleManager::LoadModuleChecked<ISourceCodeAccessModule>("SourceCodeAccess");
-		if (OutProjectCodeFilenames.Num() > 0 && SourceCodeAccessModule.GetAccessor().CanAccessSourceCode())
+		if (OutProjectCodeFilenames.Num() > 0)
 		{
+			bCodeProject = true;
 			CookArgs += TEXT(" -build");
 		}	
 
@@ -559,6 +605,8 @@ FReply SCookAndDeploy::StartCook()
 		bool bStripDebug = StripDebugFilesCheckboxOption->CheckBox->IsChecked();
 		bool bZipBuilds = ZipBuildCheckboxOption->CheckBox->IsChecked();
 		bool bDeployToBuildManager = DeployToBuildManagerCheckboxOption->CheckBox->IsChecked();
+
+		bool bRefreshBinariesOnly = RefreshBinariesOnlyCheckboxOption->CheckBox->IsChecked();
 
 		Client->bUpdateBuildStatus = bZipBuilds && bDeployToBuildManager;
 
@@ -615,6 +663,8 @@ FReply SCookAndDeploy::StartCook()
 			CookProgress->AddTask(MakeShareable(new FGetNewBuildInfoTask(Client, BuildInfoJson)));
 		}
 
+		FString StagedBuildDir = Client->GetProjectDir() / TEXT("Saved/StagedBuilds");
+
 		// Build Windows Tasks
 		if ( bWindows || bWindowsServer )
 		{
@@ -634,15 +684,31 @@ FReply SCookAndDeploy::StartCook()
 				TaskDesc += ("Win64 Server");
 			}
 
-			CookProgress->NewTask(TEXT("WindowsCook"), TEXT("Cooking ") + TaskDesc, UATPath, CookArgs + PlatformString, Client->GetEngineBatchFilesPath());
-
-			// Set up Post Cook Tasks
-			FString StagedBuildDir = Client->GetProjectDir() / TEXT("Saved/StagedBuilds");
+			if (!bRefreshBinariesOnly)
+			{
+				CookProgress->NewTask(TEXT("WindowsCook"), TEXT("Cooking ") + TaskDesc, UATPath, CookArgs + PlatformString, Client->GetEngineBatchFilesPath());
+			}
 			
+
+			// Set up Post Cook Tasks			
 			if (bWindows)
 			{
 				const FString PlatformDir = TEXT("WindowsNoEditor");
 				const FString BuildDir = StagedBuildDir / PlatformDir;
+				
+				if (bRefreshBinariesOnly)
+				{
+					if (bCodeProject)
+					{
+						const FString ProjectBinaryDir = BuildDir / Client->GetProjectName() / TEXT("Binaries/Win64");
+						CookProgress->AddTask(MakeShareable(new FRefreshWindowsProjectCPPBinaries(ProjectBinaryDir, Client->GetProjectDir(), Client->GetProjectName(), TEXT("Win64"))));
+					}
+					else
+					{
+						const FString ProjectBinaryDir = BuildDir / TEXT("Engine") / TEXT("Binaries/Win64");
+						CookProgress->AddTask(MakeShareable(new FRefreshWindowsBPBinaries(ProjectBinaryDir)));
+					}
+				}
 				
 				if (bStripDebug)
 				{
@@ -652,7 +718,7 @@ FReply SCookAndDeploy::StartCook()
 				
 				if (bZipBuilds)
 				{
-					static FString BuildArchivePath = FPaths::Combine(*StagedBuildDir, *(PlatformDir + TEXT(".zip")));
+					FString BuildArchivePath = FPaths::Combine(*StagedBuildDir, *(PlatformDir + TEXT(".zip")));
 					FPlatformFileManager::Get().GetPlatformFile().DeleteFile(*BuildArchivePath);
 					FString CommandArgs = FString::Printf(TEXT("-nologo -noprofile -command \"& { Add-Type -A 'System.IO.Compression.FileSystem'; Try { [IO.Compression.ZipFile]::CreateFromDirectory('%s', '%s.zip'); } Catch { echo $_.Exception|format-list -force; exit 1; } }\""), *PlatformDir, *PlatformDir);
 					CookProgress->NewTask(TEXT("ZipWindows"), TEXT("Zip Windows Build"), TEXT("powershell.exe"), CommandArgs, StagedBuildDir);
@@ -668,6 +734,20 @@ FReply SCookAndDeploy::StartCook()
 				const FString PlatformDir = TEXT("WindowsServer");
 				const FString BuildDir = StagedBuildDir / PlatformDir;
 
+				if (bRefreshBinariesOnly)
+				{
+					if (bCodeProject)
+					{
+						const FString ProjectBinaryDir = BuildDir / Client->GetProjectName() / TEXT("Binaries/Win64");
+						CookProgress->AddTask(MakeShareable(new FRefreshWindowsProjectCPPBinaries(ProjectBinaryDir, Client->GetProjectDir(), Client->GetProjectName(), TEXT("Win64"), true)));
+					}
+					else
+					{
+						const FString ProjectBinaryDir = BuildDir / TEXT("Engine") / TEXT("Binaries/Win64");
+						CookProgress->AddTask(MakeShareable(new FRefreshWindowsBPBinaries(ProjectBinaryDir, true)));
+					}
+				}
+
 				if (bStripDebug)
 				{
 					FString CommandArgs = FString::Printf(TEXT("-nologo -noprofile -command \"& { get-childitem \"'%s'\" -include *.pdb -recurse | foreach ($_) {remove-item $_.fullname} }\""), *BuildDir);
@@ -676,7 +756,7 @@ FReply SCookAndDeploy::StartCook()
 				
 				if (bZipBuilds)
 				{
-					static FString BuildArchivePath = FPaths::Combine(*StagedBuildDir, *(PlatformDir + TEXT(".zip")));
+					FString BuildArchivePath = FPaths::Combine(*StagedBuildDir, *(PlatformDir + TEXT(".zip")));
 					FPlatformFileManager::Get().GetPlatformFile().DeleteFile(*BuildArchivePath);
 					FString CommandArgs = FString::Printf(TEXT("-nologo -noprofile -command \"& { Add-Type -A 'System.IO.Compression.FileSystem'; Try { [IO.Compression.ZipFile]::CreateFromDirectory('%s', '%s.zip'); } Catch { echo $_.Exception|format-list -force; exit 1; } }\""), *PlatformDir, *PlatformDir);
 					CookProgress->NewTask(TEXT("ZipWindowsServer"), TEXT("Zip Windows Server Build"), TEXT("powershell.exe"), CommandArgs, StagedBuildDir);
@@ -724,7 +804,7 @@ FReply SCookAndDeploy::StartCook()
 
 				if (bZipBuilds)
 				{
-					static FString BuildArchivePath = FPaths::Combine(*StagedBuildDir, *(PlatformDir + TEXT(".zip")));
+					FString BuildArchivePath = FPaths::Combine(*StagedBuildDir, *(PlatformDir + TEXT(".zip")));
 					FPlatformFileManager::Get().GetPlatformFile().DeleteFile(*BuildArchivePath);
 					FString CommandArgs = FString::Printf(TEXT("-nologo -noprofile -command \"& { Add-Type -A 'System.IO.Compression.FileSystem'; Try { [IO.Compression.ZipFile]::CreateFromDirectory('%s', '%s.zip'); } Catch { echo $_.Exception|format-list -force; exit 1; } }\""), *PlatformDir, *PlatformDir);
 					CookProgress->NewTask(TEXT("ZipLinux"), TEXT("Zip Linux Build"), TEXT("powershell.exe"), CommandArgs, StagedBuildDir);
@@ -747,7 +827,7 @@ FReply SCookAndDeploy::StartCook()
 
 				if (bZipBuilds)
 				{
-					static FString BuildArchivePath = FPaths::Combine(*StagedBuildDir, *(PlatformDir + TEXT(".zip")));
+					FString BuildArchivePath = FPaths::Combine(*StagedBuildDir, *(PlatformDir + TEXT(".zip")));
 					FPlatformFileManager::Get().GetPlatformFile().DeleteFile(*BuildArchivePath);
 					FString CommandArgs = FString::Printf(TEXT("-nologo -noprofile -command \"& { Add-Type -A 'System.IO.Compression.FileSystem'; Try { [IO.Compression.ZipFile]::CreateFromDirectory('%s', '%s.zip'); } Catch { echo $_.Exception|format-list -force; exit 1; } }\""), *PlatformDir, *PlatformDir);
 					CookProgress->NewTask(TEXT("ZipLinuxServer"), TEXT("Zip Linux Server Build"), TEXT("powershell.exe"), CommandArgs, StagedBuildDir);
