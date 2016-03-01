@@ -26,6 +26,8 @@ public:
 	void SaveOptionsToConfig();
 
 	bool IsCookingEnabled() const;
+	bool IsWinServerSteamFixEnabled() const;
+	bool IsLinuxServerSteamFixEnabled() const;
 	bool IsBuildManagerEnabled() const;
 	bool IsBuildManagerSettingsEnabled() const;
 	FReply StartCook();

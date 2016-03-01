@@ -112,3 +112,28 @@ private:
 	FString ProjectBinaryDir;
 	bool bServer;
 };
+
+class FCopyDirTreeTask : public FGenericTask
+{
+public:
+	FCopyDirTreeTask(const FString InDestDir, const FString InSourceDir)
+		: FGenericTask(TEXT("CopyDirTree") + InSourceDir + InDestDir, FString::Printf(TEXT("CopyDirTree from %s to %s"), *InSourceDir, *InDestDir))
+		, DestDir(InDestDir)
+		, SourceDir(InSourceDir)
+	{
+	}
+protected:
+	virtual bool PerformTask() override
+	{
+		if (!FPlatformFileManager::Get().GetPlatformFile().CopyDirectoryTree(*DestDir, *SourceDir, true))
+		{
+			OnMessageRecieved().Broadcast(FString::Printf(TEXT("Failed to copy %s to %s."), *SourceDir, *DestDir));
+			return false;
+		}
+
+		return true;
+	}
+private:
+	FString DestDir;
+	FString SourceDir;
+};

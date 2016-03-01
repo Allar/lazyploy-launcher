@@ -195,7 +195,6 @@ void SCookAndDeploy::Construct(const FArguments& InArgs, TSharedRef<FLazyployLau
 				.HAlign(HAlign_Left)
 				.BorderImage(FCoreStyle::Get().GetBrush("ToolPanel.GroupBorder"))
 				.Padding(8.0f)
-				.Visibility(EVisibility::Collapsed)
 				[
 					SNew(SBox)
 					.WidthOverride(650)
@@ -213,16 +212,19 @@ void SCookAndDeploy::Construct(const FArguments& InArgs, TSharedRef<FLazyployLau
 						.ColumnSpan(2)
 						[
 							SAssignNew(WinServerSteamFixCheckboxOption, SCheckboxOption, InStyle)
-							.LabelText(LOCTEXT("WinServerSteamFix", "Fix for Steam WinServer Binaries"))
+							.IsEnabled(this, &SCookAndDeploy::IsWinServerSteamFixEnabled)
+							.LabelText(LOCTEXT("WinServerSteamFix", "Fix Steam WinServer Binaries"))
 							.CheckboxState(ECheckBoxState::Checked)
 						]
 						// Linux Server Steam Fix
 						+ SGridPanel::Slot(2, 0)
 						.VAlign(VAlign_Center)
 						.HAlign(HAlign_Left)
+						.ColumnSpan(2)
 						[
 							SAssignNew(LinuxServerSteamFixCheckboxOption, SCheckboxOption, InStyle)
-							.LabelText(LOCTEXT("LinuxServerSteamFix", "Linux?"))
+							.IsEnabled(this, &SCookAndDeploy::IsLinuxServerSteamFixEnabled)
+							.LabelText(LOCTEXT("LinuxServerSteamFix", "Fix Steam LinuxServer Binaries"))
 							.CheckboxState(ECheckBoxState::Checked)
 						]
 					]
@@ -524,6 +526,16 @@ bool SCookAndDeploy::IsCookingEnabled() const
 	return false;
 }
 
+bool SCookAndDeploy::IsWinServerSteamFixEnabled() const
+{
+	return WindowsServerCheckboxOption->CheckBox->IsChecked();
+}
+
+bool SCookAndDeploy::IsLinuxServerSteamFixEnabled() const
+{
+	return LinuxServerCheckboxOption->CheckBox->IsChecked();
+}
+
 bool SCookAndDeploy::IsBuildManagerEnabled() const
 {
 	return ZipBuildCheckboxOption->CheckBox->IsChecked();
@@ -541,6 +553,31 @@ FReply SCookAndDeploy::StartCook()
 		SaveOptionsToConfig();
 
 		CookProgress->ClearTasks();
+
+		// Determine Steam SDK if possible
+		FString SteamSDK = TEXT("");
+		{
+			FString SteamworksBuildFileContents;
+			FFileHelper::LoadFileToString(SteamworksBuildFileContents, *(FPaths::EngineSourceDir() / TEXT("ThirdParty/Steamworks/Steamworks.build.cs")));
+
+			FString SearchString = TEXT("string SteamVersion = \"");
+
+			int32 SteamVersionIdx = SteamworksBuildFileContents.Find(SearchString, ESearchCase::CaseSensitive);
+			if (SteamVersionIdx != INDEX_NONE)
+			{
+				int32 SteamVersionEndIdx = SteamworksBuildFileContents.Find("\"", ESearchCase::CaseSensitive, ESearchDir::FromStart, SteamVersionIdx + SearchString.Len());
+				SteamSDK = TEXT("Steam") + SteamworksBuildFileContents.Mid(SteamVersionIdx + SearchString.Len(), SteamVersionEndIdx - (SteamVersionIdx + SearchString.Len()));
+			}
+		}
+		if (SteamSDK.Len() > 0)
+		{
+			CookProgress->HandleTaskMessageReceived(FString::Printf(TEXT("Detected Steam SDK as %s"), *SteamSDK));
+		}
+		else
+		{
+			CookProgress->HandleTaskMessageReceived(FString::Printf(TEXT("Failed to detect Steam SDK")));
+		}
+		
 
 		FString UATPath = FPaths::ConvertRelativePathToFull(Client->GetEngineBatchFilesPath() / TEXT("RunUAT.bat"));
 		FPaths::MakePlatformFilename(UATPath);
@@ -753,6 +790,22 @@ FReply SCookAndDeploy::StartCook()
 					FString CommandArgs = FString::Printf(TEXT("-nologo -noprofile -command \"& { get-childitem \"'%s'\" -include *.pdb -recurse | foreach ($_) {remove-item $_.fullname} }\""), *BuildDir);
 					CookProgress->NewTask(TEXT("StripDebugWindowsServer"), TEXT("Strip Debug Files for Windows Server"), TEXT("powershell.exe"), CommandArgs, TEXT(""));
 				}
+
+				if (!SteamSDK.IsEmpty() && WinServerSteamFixCheckboxOption->CheckBox->IsChecked())
+				{
+					FString SteamworksBinaryPath = FPaths::EngineDir() / TEXT("Binaries/ThirdParty/Steamworks") / SteamSDK / TEXT("Win64");
+					FString StagedBinaryPath;
+					if (bCodeProject)
+					{
+						StagedBinaryPath = BuildDir / Client->GetProjectName() / TEXT("Binaries/Win64");
+					}
+					else
+					{
+						StagedBinaryPath = BuildDir / TEXT("Engine/Binaries/Win64");
+					}
+
+					CookProgress->AddTask(MakeShareable(new FCopyDirTreeTask(StagedBinaryPath, SteamworksBinaryPath)));
+				}
 				
 				if (bZipBuilds)
 				{
@@ -854,6 +907,14 @@ FReply SCookAndDeploy::StartCook()
 				if (bStripDebug)
 				{
 					// @TODO: Strip Linux Debug Files
+				}
+
+				if (!SteamSDK.IsEmpty() && LinuxServerSteamFixCheckboxOption->CheckBox->IsChecked())
+				{
+					FString SteamworksBinaryPath = FPaths::EngineDir() / TEXT("Binaries/ThirdParty/Steamworks") / SteamSDK / TEXT("Linux");
+					FString StagedBinaryPath;
+					StagedBinaryPath = BuildDir / Client->GetProjectName() / TEXT("Binaries/Linux");
+					CookProgress->AddTask(MakeShareable(new FCopyDirTreeTask(StagedBinaryPath, SteamworksBinaryPath)));
 				}
 
 				if (bZipBuilds)
