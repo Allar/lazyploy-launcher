@@ -437,7 +437,7 @@ void SCookAndDeploy::LoadOptionsFromConfig()
 	bool bRefreshBinariesOnly = false;
 
 	// Load More Cook Options
-	GConfig->GetBool(TEXT("Lazyploy.Options"), TEXT("bRefreshBinariesOnly"), bStripVersionEnabled, GEngineIni);
+	GConfig->GetBool(TEXT("Lazyploy.Options"), TEXT("bRefreshBinariesOnly"), bRefreshBinariesOnly, GEngineIni);
 
 	RefreshBinariesOnlyCheckboxOption->CheckBox->SetIsChecked(BOOL_TO_CHECKED(bRefreshBinariesOnly));
 
@@ -465,14 +465,14 @@ void SCookAndDeploy::LoadOptionsFromConfig()
 	DeployToBuildManagerCheckboxOption->CheckBox->SetIsChecked(BOOL_TO_CHECKED(bDeployToLazyployEnabled));
 
 	// Default Lazyploy options
-	FText LazyployUrl = FText::FromString(TEXT("http://localhost/"));
-	FText BuildDescription = FText::FromString(TEXT(""));
+	FString LazyployUrl = TEXT("http://localhost/");
+	FString BuildDescription = TEXT("");
 
-	GConfig->GetText(TEXT("Lazyploy.PostStage"), TEXT("LazyployUrl"), LazyployUrl, GEngineIni);
-	GConfig->GetText(TEXT("Lazyploy.PostStage"), TEXT("BuildDescription"), BuildDescription, GEngineIni);
+	GConfig->GetString(TEXT("Lazyploy.PostStage"), TEXT("LazyployUrl"), LazyployUrl, GEngineIni);
+	GConfig->GetString(TEXT("Lazyploy.PostStage"), TEXT("BuildDescription"), BuildDescription, GEngineIni);
 
-	BuildManagerUrlTextBox->SetText(LazyployUrl);
-	BuildDescriptionTextBox->SetText(BuildDescription);
+	BuildManagerUrlTextBox->SetText(FText::FromString(LazyployUrl));
+	BuildDescriptionTextBox->SetText(FText::FromString(BuildDescription));
 
 #undef BOOL_TO_CHECKED
 }
@@ -502,8 +502,8 @@ void SCookAndDeploy::SaveOptionsToConfig()
 	GConfig->SetBool(TEXT("Lazyploy.PostStage"), TEXT("bDeployLazyploy"), DeployToBuildManagerCheckboxOption->CheckBox->IsChecked(), GEngineIni);
 
 	// Default Lazyploy options
-	GConfig->SetText(TEXT("Lazyploy.PostStage"), TEXT("LazyployUrl"), BuildManagerUrlTextBox->GetText(), GEngineIni);
-	GConfig->SetText(TEXT("Lazyploy.PostStage"), TEXT("BuildDescription"), BuildDescriptionTextBox->GetText(), GEngineIni);
+	GConfig->SetString(TEXT("Lazyploy.PostStage"), TEXT("LazyployUrl"), *BuildManagerUrlTextBox->GetText().ToString(), GEngineIni);
+	GConfig->SetString(TEXT("Lazyploy.PostStage"), TEXT("BuildDescription"), *BuildDescriptionTextBox->GetText().ToString(), GEngineIni);
 
 	GConfig->Flush(false, GEngineIni);
 }
@@ -865,7 +865,7 @@ FReply SCookAndDeploy::StartCook()
 
 					if (DeployToBuildManagerCheckboxOption->CheckBox->IsChecked())
 					{
-						CookProgress->NewTask(TEXT("UploadLinux"), TEXT("Upload Linux Server Build"), Client->BuildUploadEndpoint, BuildArchivePath);
+						CookProgress->NewTask(TEXT("UploadLinuxServer"), TEXT("Upload Linux Server Build"), Client->BuildUploadEndpoint, BuildArchivePath);
 					}
 				}
 			}
