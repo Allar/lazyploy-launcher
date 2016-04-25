@@ -68,7 +68,7 @@ public:
 		{
 			ReadAllProcessOutput();
 
-			if (GetStatus() == ELauncherTaskStatus::Canceling)
+			if (IsCancelling())
 			{
 				FPlatformProcess::TerminateProc(ProcessHandle, true);
 				return false;

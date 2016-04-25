@@ -17,6 +17,7 @@ public:
 		, Result(0)
 		, Status(ELauncherTaskStatus::Pending)
 		, Thread(nullptr)
+		, bCancelling(false)
 	{
 	}
 
@@ -29,7 +30,7 @@ public:
 	*/
 	virtual void Execute()
 	{
-		check(Status == ELauncherTaskStatus::Pending);
+		check(Status == ELauncherTaskStatus::Pending && !IsCancelling());
 
 		Thread = FRunnableThread::Create(this, TEXT("FLauncherTask"));
 
@@ -68,7 +69,7 @@ public:
 		}
 		else
 		{
-			if (Status == ELauncherTaskStatus::Canceling)
+			if (IsCancelling())
 			{
 				Status = ELauncherTaskStatus::Canceled;
 			}
@@ -101,10 +102,12 @@ public:
 	{
 		if (Status == ELauncherTaskStatus::Busy)
 		{
-			Status = ELauncherTaskStatus::Canceling;
+			bCancelling = true;
+			Status = ELauncherTaskStatus::Canceled;
 		}
 		else if (Status == ELauncherTaskStatus::Pending)
 		{
+			bCancelling = true;
 			Status = ELauncherTaskStatus::Canceled;
 		}
 	}
@@ -137,6 +140,11 @@ public:
 	virtual ELauncherTaskStatus::Type GetStatus() const override
 	{
 		return Status;
+	}
+
+	virtual bool IsCancelling() const override
+	{
+		return bCancelling;
 	}
 
 	virtual bool IsFinished() const override
@@ -187,5 +195,8 @@ protected:
 	FOnTaskStartedDelegate TaskStarted;
 	FOnTaskCompletedDelegate TaskCompleted;
 	FOutputMessageReceivedDelegate MessageRecieved;
+
+	// set if this should be canceled
+	bool bCancelling;
 
 };

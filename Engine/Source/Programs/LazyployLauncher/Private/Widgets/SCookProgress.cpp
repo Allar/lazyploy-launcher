@@ -187,7 +187,7 @@ bool SCookProgress::IsCancelling() const
 {
 	for (int32 i = 0; i < TaskList.Num(); ++i)
 	{
-		if (TaskList[i]->GetStatus() == ELauncherTaskStatus::Canceling)
+		if (TaskList[i]->IsCancelling() && TaskList[i]->GetStatus() != ELauncherTaskStatus::Canceled)
 		{
 			return true;
 		}

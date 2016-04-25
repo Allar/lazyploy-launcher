@@ -132,10 +132,6 @@ private:
 
 				return LOCTEXT("StatusCanceledText", "Canceled");
 
-			case ELauncherTaskStatus::Canceling:
-
-				return LOCTEXT("StatusCancelingText", "Canceling");
-
 			case ELauncherTaskStatus::Completed:
 
 				return LOCTEXT("StatusCompletedText", "Completed");
@@ -160,8 +156,7 @@ private:
 
 		if (TaskPtr.IsValid())
 		{
-			if ((TaskPtr->GetStatus() == ELauncherTaskStatus::Busy) ||
-				(TaskPtr->GetStatus() == ELauncherTaskStatus::Canceling))
+			if ((TaskPtr->GetStatus() == ELauncherTaskStatus::Busy))
 			{
 				return EVisibility::Visible;
 			}
