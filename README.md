@@ -15,7 +15,7 @@ Lazyploy Launcher is the 'engineer' component of [Lazyploy](https://github.com/A
 
     @TODO
 
-Developed on 4.10.
+Developed on 4.11.
 
 I offer no support currently.
 
