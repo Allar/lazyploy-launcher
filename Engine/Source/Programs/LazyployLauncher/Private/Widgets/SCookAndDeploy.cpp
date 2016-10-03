@@ -5,6 +5,7 @@
 #include "SCookAndDeploy.h"
 #include "../GenericHttpJsonTask.h"
 #include "../GenericTaskCollection.h"
+#include "Misc/EngineBuildSettings.h"
 
 #define LOCTEXT_NAMESPACE "CookAndDeploy"
 
@@ -587,7 +588,7 @@ FReply SCookAndDeploy::StartCook()
 		CookArgs += TEXT(" -noP4 -nocompileeditor -utf8output -cook -map= -stage -package -clientconfig=Development -serverconfig=Development");
 
 		// Prevent compiling of UAT if using a Rocket build
-		if (FRocketSupport::IsRocket())
+		if (!FEngineBuildSettings::IsSourceDistribution())
 		{
 			CookArgs += TEXT(" -rocket -nocompile");
 		}
@@ -846,8 +847,6 @@ FReply SCookAndDeploy::StartCook()
 			}
 		
 			// Set up Post Cook Tasks
-			FString StagedBuildDir = Client->GetProjectDir() / TEXT("Saved/StagedBuilds");
-
 			if (bLinux)
 			{
 				const FString PlatformDir = TEXT("LinuxNoEditor");

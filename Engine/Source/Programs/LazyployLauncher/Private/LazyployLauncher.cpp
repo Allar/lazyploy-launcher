@@ -26,14 +26,13 @@ namespace LazyployLauncher
 }
 
 TSharedPtr<FLazyployLauncherClient> LazyployLauncherClient = nullptr;
-TSharedPtr<FSlateStyleSet> Style = nullptr;
 
 TSharedRef<SDockTab> SpawnLazyployLauncherTab(const FSpawnTabArgs& SpawnTabArgs)
 {
 	const TSharedRef<SDockTab> DockTab = SNew(SDockTab)
 		.TabRole(ETabRole::MajorTab);
 
-	DockTab->SetContent(SNew(SLazyployLauncherClient, LazyployLauncherClient.ToSharedRef(), Style.ToSharedRef()));
+	DockTab->SetContent(SNew(SLazyployLauncherClient, LazyployLauncherClient.ToSharedRef(), FLazyployLauncherClientStyle::GetPtr().ToSharedRef()));
 
 	return DockTab;
 }
@@ -79,7 +78,6 @@ void RunLazyployLauncherClient(const TCHAR* CommandLine)
 
 	// Create the main implementation object
 	LazyployLauncherClient = MakeShareable(new FLazyployLauncherClient());
-	Style = FLazyployLauncherClientStyle::GetPtr().ToSharedRef();
 
 	// Register tab
 	auto& TabSpawnerEntry = FGlobalTabmanager::Get()->RegisterNomadTabSpawner(FName("LazyployLauncher"), FOnSpawnTab::CreateStatic(&SpawnLazyployLauncherTab))
