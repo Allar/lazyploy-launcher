@@ -5,32 +5,17 @@ using System.Collections.Generic;
 
 public class LazyployLauncherTarget : TargetRules
 {
-	public LazyployLauncherTarget(TargetInfo Target)
+	public LazyployLauncherTarget(TargetInfo Target) : base(Target)
 	{
 		Type = TargetType.Program;
+		LaunchModuleName = "LazyployLauncher";
         AdditionalPlugins.Add("UdpMessaging");
+		LinkType = TargetLinkType.Modular;
     }
 
 	//
 	// TargetRules interface.
 	//
-
-	public override void SetupBinaries(
-		TargetInfo Target,
-		ref List<UEBuildBinaryConfiguration> OutBuildBinaryConfigurations,
-		ref List<string> OutExtraModuleNames
-		)
-	{
-		OutBuildBinaryConfigurations.Add(
-			new UEBuildBinaryConfiguration(	InType: UEBuildBinaryType.Executable,
-											InModuleNames: new List<string>() { "LazyployLauncher" } )
-			);
-	}
-
-	public override bool ShouldCompileMonolithic(UnrealTargetPlatform InPlatform, UnrealTargetConfiguration InConfiguration)
-	{
-		return false;
-	}
 
 	public override void SetupGlobalEnvironment(
 		TargetInfo Target,
@@ -58,18 +43,5 @@ public class LazyployLauncherTarget : TargetRules
         UEBuildConfiguration.bCompileWithPluginSupport = true;
 
         OutLinkEnvironmentConfiguration.bHasExports = false;
-    }
-
-    public override bool GUBP_AlwaysBuildWithTools(UnrealTargetPlatform InHostPlatform, out bool bInternalToolOnly, out bool SeparateNode, out bool CrossCompile)
-    {
-        bInternalToolOnly = false;
-        SeparateNode = false;
-        CrossCompile = false;
-        return true;
-    }
-
-    public override bool GUBP_NeedsPlatformSpecificDLLs()
-    {
-        return true;
     }
 }

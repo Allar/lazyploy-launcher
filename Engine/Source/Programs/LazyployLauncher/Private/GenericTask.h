@@ -21,6 +21,7 @@ public:
 	{
 	}
 
+
 public:
 
 	/**
@@ -176,6 +177,17 @@ public:
 		return Result;
 	}
 
+	virtual uint32 GetErrorCount() const override
+	{
+		return ErrorCount;
+	}
+
+
+	virtual uint32 GetWarningCount() const override
+	{
+		return WarningCount;
+	}
+
 protected:
 	
 	// Task information
@@ -195,6 +207,9 @@ protected:
 	FOnTaskStartedDelegate TaskStarted;
 	FOnTaskCompletedDelegate TaskCompleted;
 	FOutputMessageReceivedDelegate MessageRecieved;
+
+	uint32 ErrorCount;
+	uint32 WarningCount;
 
 	// set if this should be canceled
 	bool bCancelling;

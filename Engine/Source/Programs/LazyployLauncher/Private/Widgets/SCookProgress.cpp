@@ -1,4 +1,3 @@
-#include "../LazyployLauncherClientApp.h"
 #include "SCookProgress.h"
 #include "STaskListRow.h"
 #include "../GenericTask.h"
@@ -392,3 +391,5 @@ void SCookProgress::ClearLog()
 	MessageList.Reset();
 	MessageListView->RequestListRefresh();
 }
+
+#undef LOCTEXT_NAMESPACE

@@ -16,8 +16,6 @@
 
 #define LOCTEXT_NAMESPACE "LazyployLauncherClient"
 
-#if !CRASH_REPORT_UNATTENDED_ONLY
-
 /**
 * UI for the crash report client app
 */
@@ -131,7 +129,5 @@ private:
 	/** Crash report client implementation object */
 	TSharedPtr<FLazyployLauncherClient> LazyployLauncherClient;
 };
-
-#endif // !CRASH_REPORT_UNATTENDED_ONLY
 
 #undef LOCTEXT_NAMESPACE

@@ -1,8 +1,8 @@
 // Copyright 2016 Gamemakin LLC. All Rights Reserved.
 
-#include "../LazyployLauncherClientApp.h"
-#include "SLazyployLauncherFormLabel.h"
 #include "SProjectPicker.h"
+#include "SLazyployLauncherFormLabel.h"
+
 
 
 #define LOCTEXT_NAMESPACE "SProjectPicker"

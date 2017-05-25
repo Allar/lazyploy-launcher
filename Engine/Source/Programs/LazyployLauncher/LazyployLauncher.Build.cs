@@ -4,7 +4,7 @@ using UnrealBuildTool;
 
 public class LazyployLauncher : ModuleRules
 {
-	public LazyployLauncher(TargetInfo Target)
+	public LazyployLauncher(ReadOnlyTargetRules Target) : base(Target)
 	{
 		PublicIncludePaths.Add("Runtime/Launch/Public");
 

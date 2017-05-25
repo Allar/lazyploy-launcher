@@ -1,7 +1,6 @@
 // Copyright 2016 Gamemakin LLC. All Rights Reserved.
 
 
-#include "LazyployLauncherClientApp.h"
 #include "LazyployLauncher.h"
 
 #include "LazyployLauncherClient.h"
@@ -54,6 +53,9 @@ void RunLazyployLauncherClient(const TCHAR* CommandLine)
 	GEngineLoop.PreInit(*NewCommandLine);
 	FModuleManager::Get().StartProcessingNewlyLoadedObjects();
 
+	// crank up a normal Slate application using the platform's standalone renderer
+	FSlateApplication::InitializeAsStandaloneApplication(GetStandardStandaloneRenderer());
+
 	FString LazyployFrontendLayoutIni = FPaths::GetPath(GEngineIni) + "/Layout.ini";
 	// load required modules
 	FModuleManager::Get().LoadModuleChecked("EditorStyle");
@@ -69,8 +71,6 @@ void RunLazyployLauncherClient(const TCHAR* CommandLine)
 	FModuleManager::Get().LoadModule("ProjectLauncher");
 	FModuleManager::Get().LoadModule("SessionFrontend");
 
-	// crank up a normal Slate application using the platform's standalone renderer
-	FSlateApplication::InitializeAsStandaloneApplication(GetStandardStandaloneRenderer());
 	FGlobalTabmanager::Get()->SetApplicationTitle(NSLOCTEXT("LazyployLauncher", "AppTitle", "Lazyploy Launcher"));
 
 	// Prepare the custom Slate styles

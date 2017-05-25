@@ -1,5 +1,6 @@
-#include "LazyployLauncherClientApp.h"
 #include "LazyployLauncherClient.h"
+#include "LazyployLauncherClientApp.h"
+
 #include "UniquePtr.h"
 
 #include "TaskGraphInterfaces.h"

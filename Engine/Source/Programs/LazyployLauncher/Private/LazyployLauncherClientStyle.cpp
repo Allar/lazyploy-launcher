@@ -1,6 +1,5 @@
 // Copyright 2016 Gamemakin LLC. All Rights Reserved.
 
-#include "LazyployLauncherClientApp.h"
 #include "LazyployLauncherClientStyle.h"
 
 TSharedPtr< FSlateStyleSet > FLazyployLauncherClientStyle::StyleSet = nullptr;

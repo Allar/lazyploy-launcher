@@ -1,8 +1,8 @@
-#include "../LazyployLauncherClientApp.h"
+
+#include "SCookAndDeploy.h"
 #include "ISourceCodeAccessModule.h"
 #include "SClientLauncher.h"
 #include "SCookProgress.h"
-#include "SCookAndDeploy.h"
 #include "../GenericHttpJsonTask.h"
 #include "../GenericTaskCollection.h"
 #include "Misc/EngineBuildSettings.h"
@@ -583,14 +583,18 @@ FReply SCookAndDeploy::StartCook()
 		FString UATPath = FPaths::ConvertRelativePathToFull(Client->GetEngineBatchFilesPath() / TEXT("RunUAT.bat"));
 		FPaths::MakePlatformFilename(UATPath);
 
-		FString CookArgs = TEXT("BuildCookRun");
+		FString CookArgs = FString::Printf(TEXT("-ScriptsForProject=\"%s\" BuildCookRun"), *Client->GetProjectPath());
 		CookArgs += TEXT(" -project=\"") + Client->GetProjectPath() + TEXT("\"");
-		CookArgs += TEXT(" -noP4 -nocompileeditor -utf8output -cook -map= -stage -package -clientconfig=Development -serverconfig=Development");
+		CookArgs += TEXT(" -nop4 -nocompileeditor -utf8output -cook -stage -package -clientconfig=Development -serverconfig=Development -ue4exe=UE4Editor-Cmd.exe -build");
 
 		// Prevent compiling of UAT if using a Rocket build
 		if (!FEngineBuildSettings::IsSourceDistribution())
 		{
 			CookArgs += TEXT(" -rocket -nocompile");
+		}
+		else
+		{
+			CookArgs += TEXT(" -compile");
 		}
 
 		bool bCodeProject = false;
@@ -711,7 +715,7 @@ FReply SCookAndDeploy::StartCook()
 			FString TaskDesc;
 			if (bWindows)
 			{
-				PlatformString += TEXT(" -platform=Win64");
+				PlatformString += TEXT(" -targetplatform=Win64");
 				TaskDesc += TEXT("Win64");
 			}
 
@@ -936,3 +940,5 @@ FReply SCookAndDeploy::StartCook()
 	
 	return FReply::Handled();
 }
+
+#undef LOCTEXT_NAMESPACE

@@ -1,6 +1,5 @@
-#include "../LazyployLauncherClientApp.h"
-#include "SCheckboxOption.h"
 #include "SClientLauncher.h"
+#include "SCheckboxOption.h"
 
 #define LOCTEXT_NAMESPACE "ClientLauncher"
 
@@ -246,9 +245,11 @@ FReply SClientLauncher::LaunchClients()
 
 	FString EditorBinaryPath = Client->GetEditorBinaryPath();
 	uint32 ProcessID;
+	const int32 NumberOfClients = (int32)NumberOfClientsSpinBoxOption->SpinBox->GetValue();
+	bool bDisableSteam = NumberOfClients > 1;
 
 	FString NewClientArgs;
-	for (int32 i = 0; i < (int32)NumberOfClientsSpinBoxOption->SpinBox->GetValue(); ++i)
+	for (int32 i = 0; i < NumberOfClients; ++i)
 	{
 		// First (host?) client
 		if (i == 0)
@@ -283,7 +284,7 @@ FReply SClientLauncher::LaunchClients()
 
 		FString ResAndPosArgs = FString::Printf(TEXT(" -resx=%d -resy=%d -winx=%d -winy=%d"), (int32)ResXSpinBoxOption->SpinBox->GetValue(), (int32)ResYSpinBoxOption->SpinBox->GetValue(), (int32)PosXSpinBoxOption->SpinBox->GetValue() + ((i % 2) * (int32)ResXSpinBoxOption->SpinBox->GetValue()), (int32)PosYSpinBoxOption->SpinBox->GetValue() + ((i / 2) * (int32)ResYSpinBoxOption->SpinBox->GetValue()));
 
-		NewClientArgs = FString::Printf(TEXT("%s %s -game %s"), *Client->GetProjectPath(), *NewClientArgs, *ResAndPosArgs);
+		NewClientArgs = FString::Printf(TEXT("%s %s -game %s -Windowed %s"), *Client->GetProjectPath(), *NewClientArgs, *ResAndPosArgs, bDisableSteam ? TEXT("-nosteam") : TEXT(""));
 
 		UE_LOG(LogLazyployLauncher, Log, TEXT("Launching client with arguments: %s"), *NewClientArgs);
 
@@ -291,3 +292,5 @@ FReply SClientLauncher::LaunchClients()
 	}
 	return FReply::Handled();
 }
+
+#undef LOCTEXT_NAMESPACE

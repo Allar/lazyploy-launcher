@@ -1,6 +1,5 @@
 // Copyright 2016 Gamemakin LLC. All Rights Reserved.
 
-#include "../LazyployLauncherClientApp.h"
 #include "STaskListRow.h"
 #include "SThrobber.h"
 
