@@ -9,7 +9,6 @@
 #include "StandaloneRenderer.h"
 
 #include "DesktopPlatformModule.h"
-#include "LauncherServices.h"
 
 /**
 * Run the crash report client app

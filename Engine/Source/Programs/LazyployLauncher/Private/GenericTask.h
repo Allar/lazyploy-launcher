@@ -1,5 +1,8 @@
 #pragma once
 
+#include "ILauncherTask.h"
+#include "ILauncherWorker.h"
+
 /** Type definition for shared pointers to instances of FGenericTask. */
 typedef TSharedPtr<class FGenericTask> FGenericTaskPtr;
 

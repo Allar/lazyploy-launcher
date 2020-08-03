@@ -14,6 +14,7 @@ public class LazyployLauncher : ModuleRules
             new string[]
             {
                 "AutomationController",
+                "ApplicationCore",
                 "Core",
                 "CoreUObject",
                 "Projects",

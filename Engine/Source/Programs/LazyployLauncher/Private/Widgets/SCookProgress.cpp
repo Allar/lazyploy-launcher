@@ -324,9 +324,9 @@ void SCookProgress::NewTask(const FString& InName, const FString& InDesc, const 
 	TaskListView->RequestListRefresh();
 }
 
-void SCookProgress::NewTask(const FString& InName, const FString& InDesc, const FString& InURL, const FString& InFilePath)
+void SCookProgress::NewUploadTask(const FString& InName, const FString& InDesc, const FString InPlatform, const FString& InFilePath)
 {
-	FGenericTaskPtr NewTask = MakeShareable(new FGenericHttpUploadTask(InName, InDesc, InURL, InFilePath));
+	FGenericTaskPtr NewTask = MakeShareable(new FGenericHttpUploadTask(TWeakPtr<FLazyployLauncherClient>(Client), InName, InDesc, InPlatform, InFilePath));
 	NewTask->OnCompleted().AddRaw(this, &SCookProgress::HandleTaskCompleted);
 	NewTask->OnMessageRecieved().AddRaw(this, &SCookProgress::HandleTaskMessageReceived);
 	TaskList.Add(NewTask);
@@ -368,8 +368,8 @@ void SCookProgress::UpdateBuildManagerStatus(const FString& BuildStatus)
 	{
 		TSharedRef<IHttpRequest> HttpRequest = FHttpModule::Get().CreateRequest();
 		HttpRequest->SetHeader(TEXT("Content-Type"), TEXT("application/json"));
-		HttpRequest->SetURL(Client->BuildManagerURL / TEXT("api/builds") / FString::FromInt(Client->BuildId));
-		HttpRequest->SetVerb(TEXT("POST"));
+		HttpRequest->SetURL(Client->BuildManagerURL / TEXT("builds") / FString::FromInt(Client->BuildId));
+		HttpRequest->SetVerb(TEXT("PUT"));
 		HttpRequest->SetContentAsString(FString::Printf(TEXT("{ \"status\": \"%s\" }"), *BuildStatus));
 		HttpRequest->ProcessRequest();
 	}

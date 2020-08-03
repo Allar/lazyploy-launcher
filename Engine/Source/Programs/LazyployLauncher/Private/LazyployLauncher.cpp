@@ -6,12 +6,10 @@
 #include "LazyployLauncherClient.h"
 #include "Widgets/SLazyployLauncherClient.h"
 #include "LazyployLauncherClientStyle.h"
-#include "SDockTab.h"
+#include "Widgets/Docking/SDockTab.h"
 
+#include "IAutomationControllerModule.h"
 #include "RequiredProgramMainCPPInclude.h"
-
-#include "AutomationController.h"
-#include "ISourceCodeAccessModule.h"
 
 DEFINE_LOG_CATEGORY_STATIC(LogLazyployLauncher, Log, All);
 
@@ -106,7 +104,7 @@ void RunLazyployLauncherClient(const TCHAR* CommandLine)
 	const float IdealFrameTime = 1.0f / IDEAL_FRAMERATE;
 
 	// loop until the app is ready to quit
-	while (!GIsRequestingExit)
+	while (!IsEngineExitRequested())
 	{
 		FTaskGraphInterface::Get().ProcessThreadUntilIdle(ENamedThreads::GameThread);
 		FSlateApplication::Get().PumpMessages();

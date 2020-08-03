@@ -6,9 +6,8 @@
 
 #include "SLazyployLauncherClient.h"
 #include "LazyployLauncherClientStyle.h"
-#include "SlateStyle.h"
-#include "SThrobber.h"
-#include "SNumericEntryBox.h"
+#include "Widgets/Images/SThrobber.h"
+#include "Widgets/Input/SNumericEntryBox.h"
 
 #include "Widgets/SProjectPicker.h"
 #include "Widgets/SClientLauncher.h"

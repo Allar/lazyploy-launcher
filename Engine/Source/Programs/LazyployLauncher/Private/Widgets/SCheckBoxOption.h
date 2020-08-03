@@ -2,7 +2,7 @@
 
 #pragma once
 
-#include "SCheckBox.h"
+#include "Widgets/Input/SCheckBox.h"
 
 /**
 * Implements a widget that is a check box with a label

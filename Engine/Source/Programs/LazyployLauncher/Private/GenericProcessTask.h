@@ -1,5 +1,7 @@
 #pragma once
 
+#include "HAL/PlatformProcess.h"
+
 class FGenericProcessTask
 	: public FGenericTask
 {
@@ -30,7 +32,7 @@ public:
 
 			for (int32 Index = 0; Index < Count; ++Index)
 			{
-				StringArray[Index].TrimTrailing();
+				StringArray[Index].TrimEndInline();
 				if (StringArray[Index].Len() > 0)
 				{
 					OnMessageRecieved().Broadcast(StringArray[Index]);

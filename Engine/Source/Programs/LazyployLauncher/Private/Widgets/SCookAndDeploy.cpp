@@ -5,6 +5,7 @@
 #include "SCookProgress.h"
 #include "../GenericHttpJsonTask.h"
 #include "../GenericTaskCollection.h"
+#include "HAL/PlatformFilemanager.h"
 #include "Misc/EngineBuildSettings.h"
 
 #define LOCTEXT_NAMESPACE "CookAndDeploy"
@@ -660,7 +661,7 @@ FReply SCookAndDeploy::StartCook()
 			{
 			public:
 				FGetNewBuildInfoTask(TSharedPtr<FLazyployLauncherClient> InClient, FString JsonBuildInfo)
-					: FGenericHttpJsonTask(TEXT("GetBuildInfo"), TEXT("Get Build Info from Build Manager"), InClient->BuildManagerURL / TEXT("api/builds"), TEXT("POST"), JsonBuildInfo)
+					: FGenericHttpJsonTask(TEXT("GetBuildInfo"), TEXT("Get Build Info from Build Manager"), InClient->BuildManagerURL / TEXT("builds"), TEXT("POST"), JsonBuildInfo)
 					, Client(InClient)
 				{
 				}
@@ -669,9 +670,9 @@ FReply SCookAndDeploy::StartCook()
 				{
 					if (FGenericHttpJsonTask::PerformTask() && JsonObj.IsValid())
 					{	
-						if (JsonObj->TryGetNumberField(TEXT("id"), Client->BuildId))
+						if (JsonObj->TryGetNumberField(TEXT("buildid"), Client->BuildId))
 						{
-							Client->SetBuildUploadEndpoint(Client->BuildManagerURL / TEXT("api/builds") / FString::FromInt(Client->BuildId) / TEXT("upload"));
+							Client->SetBuildUploadEndpoint((Client->BuildManagerURL / TEXT("buildUploads?buildid=")) + FString::FromInt(Client->BuildId));
 							OnMessageRecieved().Broadcast(FString::Printf(TEXT("Successfully got new build info. Starting build with id: %d"), Client->BuildId));
 							return true;
 						}
@@ -767,7 +768,7 @@ FReply SCookAndDeploy::StartCook()
 
 					if (DeployToBuildManagerCheckboxOption->CheckBox->IsChecked())
 					{
-						CookProgress->NewTask(TEXT("UploadWindows"), TEXT("Upload Windows Build"), Client->BuildUploadEndpoint, BuildArchivePath);
+						CookProgress->NewUploadTask(TEXT("UploadWindows"), TEXT("Upload Windows Build"), TEXT("Windows"), BuildArchivePath);
 					}
 				}		
 			}
@@ -821,7 +822,7 @@ FReply SCookAndDeploy::StartCook()
 
 					if (DeployToBuildManagerCheckboxOption->CheckBox->IsChecked())
 					{
-						CookProgress->NewTask(TEXT("UploadWindowsServer"), TEXT("Upload Windows Server Build"), Client->BuildUploadEndpoint, BuildArchivePath);
+						CookProgress->NewUploadTask(TEXT("UploadWindowsServer"), TEXT("Upload Windows Server Build"), TEXT("WindowsServer"), BuildArchivePath);
 					}
 				}
 			}
@@ -884,7 +885,7 @@ FReply SCookAndDeploy::StartCook()
 
 					if (DeployToBuildManagerCheckboxOption->CheckBox->IsChecked())
 					{
-						CookProgress->NewTask(TEXT("UploadLinux"), TEXT("Upload Linux Build"), Client->BuildUploadEndpoint, BuildArchivePath);
+						CookProgress->NewUploadTask(TEXT("UploadLinux"), TEXT("Upload Linux Build"), TEXT("Linux"), BuildArchivePath);
 					}
 				}
 			}
@@ -929,7 +930,7 @@ FReply SCookAndDeploy::StartCook()
 
 					if (DeployToBuildManagerCheckboxOption->CheckBox->IsChecked())
 					{
-						CookProgress->NewTask(TEXT("UploadLinuxServer"), TEXT("Upload Linux Server Build"), Client->BuildUploadEndpoint, BuildArchivePath);
+						CookProgress->NewUploadTask(TEXT("UploadLinuxServer"), TEXT("Upload Linux Server Build"), TEXT("LinuxServer"), BuildArchivePath);
 					}
 				}
 			}

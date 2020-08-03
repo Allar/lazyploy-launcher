@@ -2,7 +2,7 @@
 
 #pragma once
 
-#include "SSpinBox.h"
+#include "Widgets/Input/SSpinBox.h"
 
 /**
 * Implements a widget that is a int Spinbox with a label

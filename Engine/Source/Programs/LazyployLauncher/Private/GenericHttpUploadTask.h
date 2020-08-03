@@ -1,17 +1,19 @@
 #pragma once
 
-#include "IHttpRequest.h"
-#include "IHttpResponse.h"
+#include "Interfaces/IHttpRequest.h"
+#include "Interfaces/IHttpResponse.h"
 #include "HttpModule.h"
+#include "LazyployLauncherClient.h"
 
 class FGenericHttpUploadTask
 	: public FGenericTask
 {
 public:
-	FGenericHttpUploadTask(const FString& InName, const FString& InDesc, const FString& InURL, const FString& InFilePath)
+	FGenericHttpUploadTask(TWeakPtr<FLazyployLauncherClient> InLazyployClient, const FString& InName, const FString& InDesc, const FString& InPlatform, const FString& InFilePath)
 		: FGenericTask(InName, InDesc)
+		, LazyployClient(InLazyployClient)
+		, Platform(InPlatform)
 		, TaskFilePath(InFilePath)
-		, TaskURL(InURL)
 		, PayloadSize(0)
 		, bHttpRequestFinished(false)
 		, bUploadSucceeded(false)
@@ -22,7 +24,7 @@ public:
 
 	void UploadRequestProgress(FHttpRequestPtr HttpRequest, int32 BytesSent, int32 BytesRecieved)
 	{
-		OnMessageRecieved().Broadcast(FString::Printf(TEXT("Uploaded %d / %d (%d%%) bytes."), BytesSent, PayloadSize, (int32)(((float)BytesSent/(float)PayloadSize)*100.0f)));
+		//OnMessageRecieved().Broadcast(FString::Printf(TEXT("Uploaded %d / %d (%d%%) bytes."), BytesSent, PayloadSize, (int32)(((float)BytesSent/(float)PayloadSize)*100.0f)));
 	}
 	
 	void UploadRequestComplete(FHttpRequestPtr HttpRequest, FHttpResponsePtr HttpResponse, bool bSucceeded)
@@ -36,7 +38,8 @@ public:
 
 		OnMessageRecieved().Broadcast(HttpResponse->GetContentAsString());
 
-		if (HttpResponse->GetResponseCode() == 200)
+		const int32 ResponseCode = HttpResponse->GetResponseCode();
+		if (ResponseCode >= 200 && ResponseCode <= 299)
 		{
 			// If server response doesn't include error, mark as upload succeeded
 			if (!HttpResponse.Get()->GetContentAsString().Contains(TEXT("Error")))
@@ -53,6 +56,36 @@ public:
 
 	virtual bool PerformTask() override
 	{
+		check(LazyployClient.IsValid());
+
+		//curl -F "file=@D:/depot/jam/Saved/StagedBuilds/WindowsNoEditor.zip" "http://localhost:3030/buildUploads?buildid=2&platform=Linux"
+
+		FString FullCommandLine = FString::Printf(TEXT("/c curl -F \"file=@%s\" \"%s&platform=%s\""), *TaskFilePath, *LazyployClient.Pin()->BuildUploadEndpoint, *Platform);
+		TSharedPtr<FMonitoredProcess> UploadProcess = MakeShareable(new FMonitoredProcess(TEXT("cmd.exe"), FullCommandLine, true));
+
+		FMonitoredProcess Process(TEXT("cmd.exe"), FullCommandLine, true);
+        Process.OnOutput().BindLambda([this](const FString& Text){ OnMessageRecieved().Broadcast(Text); });
+        Process.Launch();
+        while(Process.Update())
+        {
+        	OnMessageRecieved().Broadcast(TEXT("working..."));
+            FPlatformProcess::Sleep(0.1f);
+        }
+
+        int32 ReturnCode = Process.GetReturnCode();
+        if (ReturnCode != 0)
+        {
+        	OnMessageRecieved().Broadcast(TEXT("Upload failed."));
+            return false;
+        }
+		
+		return true;
+	}
+
+	virtual bool PerformOldTask()
+	{
+		OnMessageRecieved().Broadcast(FString::Printf(TEXT("START TASK")));
+		check(LazyployClient.IsValid());
 
 		// Open file for reading
 		FArchive* Reader = IFileManager::Get().CreateFileReader(*TaskFilePath, 0);
@@ -88,10 +121,14 @@ public:
 		{
 			PayloadBytes[i/2] = PayloadHeaderBytes[i];
 		}
+
+		OnMessageRecieved().Broadcast(FString::Printf(TEXT("PRE-SERIALIZED")));
 		
 		Reader->Serialize(PayloadBytes + HeaderSize, FileSize);
 		Reader->Close();
 		delete Reader;
+
+		OnMessageRecieved().Broadcast(FString::Printf(TEXT("POST-SERIALIZED")));
 
 		// Ghetto UTF8 to ANSI copy (@TODO: Make better)
 		for (int32 i = 0; i < FooterSize * 2; i += 2)
@@ -101,12 +138,14 @@ public:
 		
 		TSharedRef<IHttpRequest> HttpRequest = FHttpModule::Get().CreateRequest();
 		HttpRequest->SetHeader(TEXT("Content-Type"), TEXT("multipart/form-data; boundary=") + DataBoundary);
-		HttpRequest->SetURL(TaskURL);
+		HttpRequest->SetURL(LazyployClient.Pin()->BuildUploadEndpoint + TEXT("&platform=") + Platform);
 		HttpRequest->SetVerb(TEXT("POST"));
 		HttpRequest->SetContent(Payload);
 		HttpRequest->OnRequestProgress().BindRaw(this, &FGenericHttpUploadTask::UploadRequestProgress);
 		HttpRequest->OnProcessRequestComplete().BindRaw(this, &FGenericHttpUploadTask::UploadRequestComplete);
 		HttpRequest->ProcessRequest();
+
+		OnMessageRecieved().Broadcast(FString::Printf(TEXT("Pre-Sleep")));
 
 		Payload.Reset();
 
@@ -115,12 +154,16 @@ public:
 			FPlatformProcess::Sleep(0.25);
 		}
 
+		OnMessageRecieved().Broadcast(FString::Printf(TEXT("DONE")));
+
 		return bUploadSucceeded;
 	}
 
 protected:
 
-	const FString& TaskURL;
+	TWeakPtr<FLazyployLauncherClient> LazyployClient;
+	
+	const FString Platform;
 	const FString& TaskFilePath;
 
 	int32 PayloadSize; 

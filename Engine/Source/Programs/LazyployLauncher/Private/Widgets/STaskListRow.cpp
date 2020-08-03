@@ -1,7 +1,7 @@
 // Copyright 2016 Gamemakin LLC. All Rights Reserved.
 
 #include "STaskListRow.h"
-#include "SThrobber.h"
+#include "Widgets/Images/SThrobber.h"
 
 
 BEGIN_SLATE_FUNCTION_BUILD_OPTIMIZATION

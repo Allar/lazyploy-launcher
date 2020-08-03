@@ -2,6 +2,7 @@
 
 #include "SProjectPicker.h"
 #include "SLazyployLauncherFormLabel.h"
+#include "GameProjectHelper.h"
 
 
 

@@ -3,7 +3,7 @@
 #pragma once
 
 #include "SlateBasics.h"
-#include "SlateStyle.h"
+#include "Styling/SlateStyle.h"
 
 /** Slate styles for the crash report client app */
 class FLazyployLauncherClientStyle

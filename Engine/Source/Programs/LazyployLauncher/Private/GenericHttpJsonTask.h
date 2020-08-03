@@ -1,7 +1,7 @@
 #pragma once
 
-#include "IHttpRequest.h"
-#include "IHttpResponse.h"
+#include "Interfaces/IHttpRequest.h"
+#include "Interfaces/IHttpResponse.h"
 #include "HttpModule.h"
 
 class FGenericHttpJsonTask
@@ -11,8 +11,8 @@ public:
 	FGenericHttpJsonTask(const FString& InName, const FString& InDesc, const FString& InURL, const FString& InVerb = TEXT("GET"), const FString& InContent = TEXT(""))
 		: FGenericTask(InName, InDesc)
 		, URL(InURL)
-		, Verb(InVerb)
 		, Content(InContent)
+		, Verb(InVerb)
 		, bHttpRequestFinished(false)
 		, JsonObj(nullptr)
 	{

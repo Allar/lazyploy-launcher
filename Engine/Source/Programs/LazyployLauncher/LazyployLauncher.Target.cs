@@ -11,37 +11,16 @@ public class LazyployLauncherTarget : TargetRules
 		LaunchModuleName = "LazyployLauncher";
         AdditionalPlugins.Add("UdpMessaging");
 		LinkType = TargetLinkType.Modular;
-    }
+		
+		bUseMallocProfiler = false;
+		bBuildWithEditorOnlyData = true;
+		
+		bCompileAgainstEngine = false;
+		bCompileAgainstCoreUObject = true;
+        bForceBuildTargetPlatforms = true;
+        bCompileWithStatsWithoutEngine = true;
+        bCompileWithPluginSupport = true;
 
-	//
-	// TargetRules interface.
-	//
-
-	public override void SetupGlobalEnvironment(
-		TargetInfo Target,
-		ref LinkEnvironmentConfiguration OutLinkEnvironmentConfiguration,
-		ref CPPEnvironmentConfiguration OutCPPEnvironmentConfiguration
-		)
-	{
-		// Lean and mean
-		//UEBuildConfiguration.bCompileLeanAndMeanUE = true;
-
-		// Never use malloc profiling in Unreal Header Tool.  We set this because often UHT is compiled right before the engine
-		// automatically by Unreal Build Tool, but if bUseMallocProfiler is defined, UHT can operate incorrectly.
-		BuildConfiguration.bUseMallocProfiler = false;
-
-		// No editor needed
-		UEBuildConfiguration.bBuildEditor = false;
-		// Editor-only data, however, is needed
-		UEBuildConfiguration.bBuildWithEditorOnlyData = true;
-
-		// Currently this app is not linking against the engine, so we'll compile out references from Core to the rest of the engine
-		UEBuildConfiguration.bCompileAgainstEngine = false;
-		UEBuildConfiguration.bCompileAgainstCoreUObject = true;
-        UEBuildConfiguration.bForceBuildTargetPlatforms = true;
-        UEBuildConfiguration.bCompileWithStatsWithoutEngine = true;
-        UEBuildConfiguration.bCompileWithPluginSupport = true;
-
-        OutLinkEnvironmentConfiguration.bHasExports = false;
+        bHasExports = false;
     }
 }
